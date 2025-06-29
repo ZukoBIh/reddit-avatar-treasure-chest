@@ -139,7 +139,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                 </p>
                 <motion.div
                   className="mt-4 text-6xl"
-                  animate({ 
+                  animate={{ 
                     rotate: 360,
                     scale: [1, 1.3, 1]
                   }}
