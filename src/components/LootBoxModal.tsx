@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
@@ -23,10 +23,10 @@ interface LootBoxModalProps {
 const possibleRewards: Reward[] = [
   { type: 'token', name: '$HROOM', amount: 100, rarity: 'Common', icon: '🍄' },
   { type: 'token', name: '$SPORE', amount: 50, rarity: 'Rare', icon: '🌱' },
-  { type: 'nft', name: 'Golden Treasure', rarity: 'Legendary', icon: '🏆' },
-  { type: 'xp', name: 'Experience Points', amount: 250, rarity: 'Common', icon: '⭐' },
-  { type: 'badge', name: 'Treasure Hunter', rarity: 'Rare', icon: '🏴‍☠️' },
-  { type: 'nft', name: 'Crystal Shard', rarity: 'Rare', icon: '💎' },
+  { type: 'nft', name: 'Golden Mushroom', rarity: 'Legendary', icon: '🍄‍🟫' },
+  { type: 'xp', name: 'Foraging XP', amount: 250, rarity: 'Common', icon: '⭐' },
+  { type: 'badge', name: 'Master Forager', rarity: 'Rare', icon: '🏆' },
+  { type: 'nft', name: 'Mystical Spore', rarity: 'Rare', icon: '✨' },
   { type: 'token', name: '$HROOM', amount: 500, rarity: 'Legendary', icon: '🍄' },
 ];
 
@@ -41,10 +41,10 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     setShowReward(false);
   };
 
-  const openLootBox = async () => {
+  const openForageChest = async () => {
     setIsOpening(true);
     
-    // Simulate loot box opening delay
+    // Simulate forage chest opening delay
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     // Randomly select a reward (with rarity weighting)
@@ -54,8 +54,8 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     setShowReward(true);
     
     toast({
-      title: "Treasure Found! 🎉",
-      description: `You received ${randomReward.name}${randomReward.amount ? ` x${randomReward.amount}` : ''}!`,
+      title: "Foraged Successfully! 🍄",
+      description: `You discovered ${randomReward.name}${randomReward.amount ? ` x${randomReward.amount}` : ''}!`,
     });
   };
 
@@ -74,7 +74,10 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md bg-black/90 backdrop-blur-sm border-purple-500/30 text-white">
+      <DialogContent className="max-w-md bg-black/90 backdrop-blur-sm border-green-500/30 text-white">
+        <DialogTitle className="sr-only">Forage Chest</DialogTitle>
+        <DialogDescription className="sr-only">Open your forage chest to discover rewards</DialogDescription>
+        
         <div className="text-center p-6">
           <motion.div
             className="text-4xl mb-4"
@@ -85,7 +88,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
           </motion.div>
           
           <h2 className="text-2xl font-bold mb-2">{avatar.name}</h2>
-          <p className="text-purple-200 mb-6">Ready to unlock your treasure?</p>
+          <p className="text-green-200 mb-6">Ready to open your forage chest?</p>
           
           <AnimatePresence mode="wait">
             {!isOpening && !showReward && (
@@ -100,17 +103,17 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                   whileHover={{ scale: 1.1 }}
                   animate={{ 
                     rotateY: [0, 10, -10, 0],
-                    filter: ['hue-rotate(0deg)', 'hue-rotate(360deg)', 'hue-rotate(0deg)']
+                    filter: ['hue-rotate(0deg)', 'hue-rotate(120deg)', 'hue-rotate(0deg)']
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  📦
+                  🧺
                 </motion.div>
                 <Button
-                  onClick={openLootBox}
-                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold py-3 px-8 rounded-xl text-lg"
+                  onClick={openForageChest}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 px-8 rounded-xl text-lg"
                 >
-                  Open Treasure Chest!
+                  Open Forage Chest!
                 </Button>
               </motion.div>
             )}
@@ -132,10 +135,10 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                   }}
                   transition={{ duration: 0.5, repeat: Infinity }}
                 >
-                  📦
+                  🧺
                 </motion.div>
-                <p className="text-xl text-yellow-400 font-semibold">
-                  Opening your treasure chest...
+                <p className="text-xl text-green-400 font-semibold">
+                  Foraging through your chest...
                 </p>
                 <motion.div
                   className="mt-4 text-6xl"
@@ -145,7 +148,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                   }}
                   transition={{ duration: 1, repeat: Infinity }}
                 >
-                  ✨
+                  🌿
                 </motion.div>
               </motion.div>
             )}
@@ -168,15 +171,15 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                   {reward.icon}
                 </motion.div>
                 
-                <div className="bg-gradient-to-r from-purple-600/50 to-pink-600/50 p-6 rounded-xl border border-purple-400/30">
-                  <h3 className="text-2xl font-bold text-yellow-400 mb-2">
-                    Congratulations!
+                <div className="bg-gradient-to-r from-green-600/50 to-emerald-600/50 p-6 rounded-xl border border-green-400/30">
+                  <h3 className="text-2xl font-bold text-green-400 mb-2">
+                    Great Find!
                   </h3>
                   <p className="text-xl mb-3">
                     {reward.name} {reward.amount && `x${reward.amount}`}
                   </p>
                   <Badge className={`mb-4 ${
-                    reward.rarity === 'Legendary' ? 'bg-purple-500' :
+                    reward.rarity === 'Legendary' ? 'bg-yellow-500' :
                     reward.rarity === 'Rare' ? 'bg-blue-500' : 'bg-gray-500'
                   }`}>
                     {reward.rarity}
@@ -195,7 +198,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                         setReward(null);
                       }}
                       variant="outline"
-                      className="w-full border-purple-400 text-purple-300 hover:bg-purple-500/20"
+                      className="w-full border-green-400 text-green-300 hover:bg-green-500/20"
                     >
                       Open Another Chest
                     </Button>

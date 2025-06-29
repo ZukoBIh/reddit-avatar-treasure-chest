@@ -18,22 +18,23 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800">
-      {/* Animated background particles */}
+    <div className="min-h-screen bg-gradient-to-br from-green-900 via-emerald-900 to-green-800">
+      {/* Animated spore particles */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(25)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-yellow-400 rounded-full opacity-60"
+            className="absolute w-1 h-1 bg-yellow-300 rounded-full opacity-70"
             animate={{
-              y: [0, -100, 0],
-              x: [0, Math.random() * 100 - 50, 0],
-              opacity: [0.6, 1, 0.6],
+              y: [0, -120, 0],
+              x: [0, Math.random() * 80 - 40, 0],
+              opacity: [0.7, 1, 0.7],
+              scale: [0.5, 1.2, 0.5],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 4 + Math.random() * 3,
               repeat: Infinity,
-              delay: Math.random() * 2,
+              delay: Math.random() * 3,
             }}
             style={{
               left: `${Math.random() * 100}%`,
@@ -55,23 +56,23 @@ const Index = () => {
             <motion.div
               className="text-6xl mr-4"
               animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              transition={{ duration: 3, repeat: Infinity }}
             >
-              🏴‍☠️
+              🍄
             </motion.div>
-            <h1 className="text-5xl font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              Reddit Avatar Treasure Chest
+            <h1 className="text-5xl font-bold text-white bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+              Mushroom Forage Chests
             </h1>
             <motion.div
               className="text-6xl ml-4"
               animate={{ rotate: [0, -10, 10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+              transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
             >
-              💎
+              🌱
             </motion.div>
           </div>
-          <p className="text-xl text-purple-200 max-w-2xl mx-auto">
-            Connect your wallet and unlock exclusive rewards based on your Reddit Collectible Avatars!
+          <p className="text-xl text-green-200 max-w-2xl mx-auto">
+            Connect your wallet and discover magical rewards hidden in your Actrule NFT collection!
           </p>
         </motion.header>
 
@@ -84,23 +85,23 @@ const Index = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <Card className="p-8 bg-black/20 backdrop-blur-sm border-purple-500/30">
+              <Card className="p-8 bg-black/20 backdrop-blur-sm border-green-500/30">
                 <div className="text-center">
                   <motion.div
                     className="text-8xl mb-6"
                     animate={{ 
                       scale: [1, 1.1, 1],
-                      filter: ['hue-rotate(0deg)', 'hue-rotate(360deg)', 'hue-rotate(0deg)']
+                      filter: ['hue-rotate(0deg)', 'hue-rotate(90deg)', 'hue-rotate(0deg)']
                     }}
-                    transition={{ duration: 3, repeat: Infinity }}
+                    transition={{ duration: 4, repeat: Infinity }}
                   >
-                    🏆
+                    🍄
                   </motion.div>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    Ready to Discover Your Treasures?
+                    Ready to Forage for Treasures?
                   </h2>
-                  <p className="text-purple-200 mb-6">
-                    Connect your wallet to see which Reddit Avatars you own and unlock their exclusive loot boxes!
+                  <p className="text-green-200 mb-6">
+                    Connect your wallet to discover which Actrule NFTs you own and unlock their magical forage chests!
                   </p>
                   <WalletConnection onConnect={() => setIsWalletConnected(true)} />
                 </div>
@@ -114,10 +115,10 @@ const Index = () => {
             >
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-white mb-4">
-                  Your Avatar Collection
+                  Your Actrule Collection
                 </h2>
-                <p className="text-purple-200">
-                  Click on any avatar to open its treasure chest!
+                <p className="text-green-200">
+                  Click on any NFT to open its forage chest!
                 </p>
               </div>
               <AvatarGrid onAvatarSelect={handleAvatarSelect} />
@@ -125,7 +126,7 @@ const Index = () => {
           )}
         </div>
 
-        {/* Loot Box Modal */}
+        {/* Forage Box Modal */}
         <LootBoxModal
           isOpen={isLootBoxOpen}
           onClose={() => setIsLootBoxOpen(false)}

@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useAccount } from 'wagmi';
 
 interface Avatar {
   id: string;
@@ -21,56 +22,56 @@ interface AvatarGridProps {
 const mockAvatars: Avatar[] = [
   {
     id: '1',
-    name: 'Cosmic Wanderer',
-    collection: 'The Senses',
+    name: 'Mystic Mushroom',
+    collection: 'Actrule Genesis',
     rarity: 'Legendary',
-    image: '🌌',
-    traits: ['Glowing Eyes', 'Cosmic Aura'],
+    image: '🍄‍🟫',
+    traits: ['Glowing Cap', 'Ancient Spores'],
     lootBoxesAvailable: 3
   },
   {
     id: '2',
-    name: 'Mushroom Mystic',
-    collection: 'Spore Squad',
+    name: 'Forest Sage',
+    collection: 'Actrule Mystics',
     rarity: 'Rare',
-    image: '🍄',
-    traits: ['Mystical Glow', 'Spore Trail'],
+    image: '🧙‍♂️',
+    traits: ['Nature Magic', 'Woodland Wisdom'],
     lootBoxesAvailable: 2
   },
   {
     id: '3',
-    name: 'Digital Punk',
-    collection: 'Meme Team',
+    name: 'Spore Keeper',
+    collection: 'Actrule Commons',
     rarity: 'Common',
-    image: '🤖',
-    traits: ['Pixel Art', 'Neon Glow'],
+    image: '🌱',
+    traits: ['Growth Power', 'Life Energy'],
     lootBoxesAvailable: 1
   },
   {
     id: '4',
-    name: 'Crystal Guardian',
-    collection: 'The Senses',
+    name: 'Crystal Mushroom',
+    collection: 'Actrule Elementals',
     rarity: 'Rare',
     image: '💎',
-    traits: ['Crystal Body', 'Light Refraction'],
+    traits: ['Crystalline Structure', 'Light Refraction'],
     lootBoxesAvailable: 2
   },
   {
     id: '5',
-    name: 'Shadow Ninja',
-    collection: 'Dark Arts',
+    name: 'Shadow Spore',
+    collection: 'Actrule Dark',
     rarity: 'Legendary',
-    image: '🥷',
-    traits: ['Shadow Form', 'Stealth Mode'],
+    image: '🖤',
+    traits: ['Shadow Form', 'Dark Energy'],
     lootBoxesAvailable: 3
   },
   {
     id: '6',
-    name: 'Fire Spirit',
-    collection: 'Elemental',
+    name: 'Golden Truffle',
+    collection: 'Actrule Rare',
     rarity: 'Rare',
-    image: '🔥',
-    traits: ['Flame Aura', 'Heat Wave'],
+    image: '🏆',
+    traits: ['Golden Sheen', 'Rare Find'],
     lootBoxesAvailable: 2
   }
 ];
@@ -78,10 +79,22 @@ const mockAvatars: Avatar[] = [
 const rarityColors = {
   Common: 'bg-gray-500',
   Rare: 'bg-blue-500',
-  Legendary: 'bg-purple-500'
+  Legendary: 'bg-yellow-500'
 };
 
 const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
+  const { address, isConnected } = useAccount();
+
+  // TODO: Replace with actual NFT fetching logic
+  // const { data: nfts } = useQuery({
+  //   queryKey: ['actrule-nfts', address],
+  //   queryFn: () => fetchActruleNFTs(address),
+  //   enabled: !!address && isConnected,
+  // });
+
+  console.log('Connected wallet address:', address);
+  console.log('Is connected:', isConnected);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
       {mockAvatars.map((avatar, index) => (
@@ -95,7 +108,7 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
           onClick={() => onAvatarSelect(avatar)}
           className="cursor-pointer"
         >
-          <Card className="p-6 bg-black/30 backdrop-blur-sm border-purple-500/30 hover:border-purple-400/60 transition-all duration-300">
+          <Card className="p-6 bg-black/30 backdrop-blur-sm border-green-500/30 hover:border-green-400/60 transition-all duration-300">
             <div className="text-center">
               <motion.div
                 className="text-6xl mb-4"
@@ -104,7 +117,7 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
                   scale: [1, 1.1, 1]
                 }}
                 transition={{ 
-                  duration: 2, 
+                  duration: 3, 
                   repeat: Infinity,
                   repeatType: "reverse"
                 }}
@@ -113,7 +126,7 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
               </motion.div>
               
               <h3 className="text-xl font-bold text-white mb-2">{avatar.name}</h3>
-              <p className="text-purple-200 text-sm mb-3">{avatar.collection}</p>
+              <p className="text-green-200 text-sm mb-3">{avatar.collection}</p>
               
               <div className="flex justify-center mb-3">
                 <Badge className={`${rarityColors[avatar.rarity]} text-white`}>
@@ -122,10 +135,10 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
               </div>
               
               <div className="mb-4">
-                <p className="text-xs text-purple-300 mb-1">Traits:</p>
+                <p className="text-xs text-green-300 mb-1">Traits:</p>
                 <div className="flex flex-wrap gap-1 justify-center">
                   {avatar.traits.map((trait, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs border-purple-400 text-purple-200">
+                    <Badge key={idx} variant="outline" className="text-xs border-green-400 text-green-200">
                       {trait}
                     </Badge>
                   ))}
@@ -133,17 +146,17 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
               </div>
               
               <motion.div
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-2 rounded-lg font-semibold"
+                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-lg font-semibold"
                 animate={{ 
                   boxShadow: [
-                    '0 0 10px rgba(251, 191, 36, 0.5)',
-                    '0 0 20px rgba(251, 191, 36, 0.8)',
-                    '0 0 10px rgba(251, 191, 36, 0.5)'
+                    '0 0 10px rgba(34, 197, 94, 0.5)',
+                    '0 0 20px rgba(34, 197, 94, 0.8)',
+                    '0 0 10px rgba(34, 197, 94, 0.5)'
                   ]
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                🎁 {avatar.lootBoxesAvailable} Chest{avatar.lootBoxesAvailable !== 1 ? 's' : ''} Available
+                🧺 {avatar.lootBoxesAvailable} Chest{avatar.lootBoxesAvailable !== 1 ? 's' : ''} Available
               </motion.div>
             </div>
           </Card>
