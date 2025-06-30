@@ -42,7 +42,7 @@ interface Avatar {
 
 // Known Actrule collection contract addresses
 const ACTRULE_CONTRACTS = [
-  '0xa63efde7cb14dd537b7e61a3087ae9b8a7849ee2',
+  '0xA63EfDE7Cb14DD537b7e61a3087aE9B8A7849eE2',
   '0xe364d16731579078afa1195630e4035657ef9d1a',
   '0x97386b7fae8bc384afa1af14b6dd96d9123f762f',
   '0x9c92b882ac7aeff58414d874de60d30381991bad',
