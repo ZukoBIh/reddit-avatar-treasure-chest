@@ -1,4 +1,3 @@
-
 interface AlchemyNft {
   contract: {
     address: string;
@@ -41,10 +40,13 @@ interface Avatar {
   tokenId: string;
 }
 
-// Known Actrule collection contract addresses - you'll need to add the actual ones
+// Known Actrule collection contract addresses
 const ACTRULE_CONTRACTS = [
-  '0x466cfcd0525189b573e794f554b8a751279213ac', // Example - replace with actual Actrule contract addresses
-  // Add more contract addresses as needed
+  '0xa63efde7cb14dd537b7e61a3087ae9b8a7849ee2',
+  '0xe364d16731579078afa1195630e4035657ef9d1a',
+  '0x97386b7fae8bc384afa1af14b6dd96d9123f762f',
+  '0x9c92b882ac7aeff58414d874de60d30381991bad',
+  '0xbd24e412d8eb0bca223ad87869374d97cede3424'
 ];
 
 const getRarityFromTraits = (attributes: Array<{ trait_type: string; value: string; }> = []): 'Common' | 'Rare' | 'Legendary' => {
