@@ -41,9 +41,9 @@ interface Avatar {
   tokenId: string;
 }
 
-// Known Actrule collection contract addresses
+// Known Actrule collection contract addresses - you'll need to add the actual ones
 const ACTRULE_CONTRACTS = [
-  '0x466cfcd0525189b573e794f554b8a751279213ac', // Add actual Actrule contract addresses here
+  '0x466cfcd0525189b573e794f554b8a751279213ac', // Example - replace with actual Actrule contract addresses
   // Add more contract addresses as needed
 ];
 
@@ -82,8 +82,7 @@ export const fetchActruleNFTs = async (walletAddress: string): Promise<Avatar[]>
   try {
     console.log('Fetching NFTs for address:', walletAddress);
     
-    // Note: You'll need to replace this with your actual Alchemy API key
-    const ALCHEMY_API_KEY = 'YOUR_ALCHEMY_API_KEY';
+    const ALCHEMY_API_KEY = 'cXg1UT8KE9odMh3FcWfpO';
     const baseURL = `https://polygon-mainnet.g.alchemy.com/nft/v3/${ALCHEMY_API_KEY}/getNFTsForOwner`;
     
     const response = await fetch(`${baseURL}?owner=${walletAddress}&contractAddresses[]=${ACTRULE_CONTRACTS.join('&contractAddresses[]=')}&withMetadata=true&limit=100`);
