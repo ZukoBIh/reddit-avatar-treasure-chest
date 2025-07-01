@@ -48,11 +48,11 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     setLevelUpInfo(null);
   };
 
-  const openForageChest = async () => {
+  const openChest = async () => {
     setIsOpening(true);
     
-    // Simulate forage chest opening delay
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Simulate chest opening delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Generate random XP between 10-30
     const randomXP = Math.floor(Math.random() * 21) + 10;
@@ -62,22 +62,22 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     const levelResult = addXP(randomXP);
     setLevelUpInfo(levelResult);
     
-    // Randomly select a reward (with rarity weighting)
+    // Randomly select a reward
     const randomReward = possibleRewards[Math.floor(Math.random() * possibleRewards.length)];
     setReward(randomReward);
     setIsOpening(false);
     setShowReward(true);
     
-    // Show appropriate toast based on level up
+    // Show toast notification
     if (levelResult.leveledUp) {
       toast({
         title: "Level Up! 🎉",
-        description: `You reached Level ${levelResult.newLevel} and earned 1 $HROOM! Plus ${randomXP} XP!`,
+        description: `Level ${levelResult.newLevel} reached! +${randomXP} XP & +1 $HROOM!`,
       });
     } else {
       toast({
-        title: "Foraged Successfully! 🍄",
-        description: `You gained ${randomXP} XP and discovered ${randomReward.name}${randomReward.amount ? ` x${randomReward.amount}` : ''}!`,
+        title: "Chest Opened! 📦",
+        description: `+${randomXP} XP gained!`,
       });
     }
   };
@@ -98,8 +98,8 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md bg-black/90 backdrop-blur-sm border-green-500/30 text-white">
-        <DialogTitle className="sr-only">Forage Chest</DialogTitle>
-        <DialogDescription className="sr-only">Open your forage chest to discover rewards</DialogDescription>
+        <DialogTitle className="sr-only">Treasure Chest</DialogTitle>
+        <DialogDescription className="sr-only">Open your treasure chest to discover rewards</DialogDescription>
         
         <div className="text-center p-6">
           <motion.div
@@ -110,8 +110,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
             {avatar.image}
           </motion.div>
           
-          <h2 className="text-2xl font-bold mb-2">{avatar.name}</h2>
-          <p className="text-green-200 mb-6">Ready to open your forage chest?</p>
+          <h2 className="text-2xl font-bold mb-6">{avatar.name}</h2>
           
           <AnimatePresence mode="wait">
             {!isOpening && !showReward && (
@@ -122,21 +121,40 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                 exit={{ opacity: 0, scale: 0.8 }}
               >
                 <motion.div
-                  className="text-8xl mb-6"
+                  className="text-8xl mb-6 relative"
                   whileHover={{ scale: 1.1 }}
                   animate={{ 
                     rotateY: [0, 10, -10, 0],
-                    filter: ['hue-rotate(0deg)', 'hue-rotate(120deg)', 'hue-rotate(0deg)']
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  🧺
+                  📦
+                  <motion.div
+                    className="absolute -top-2 -right-2 text-3xl"
+                    animate={{ 
+                      rotate: [0, 15, -15, 0],
+                      scale: [1, 1.2, 1]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                  >
+                    🍄
+                  </motion.div>
+                  <motion.div
+                    className="absolute -bottom-2 -left-2 text-2xl"
+                    animate={{ 
+                      rotate: [0, -10, 10, 0],
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{ duration: 2.5, repeat: Infinity, delay: 1 }}
+                  >
+                    🍄
+                  </motion.div>
                 </motion.div>
                 <Button
-                  onClick={openForageChest}
+                  onClick={openChest}
                   className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 px-8 rounded-xl text-lg"
                 >
-                  Open Forage Chest!
+                  Open Chest!
                 </Button>
               </motion.div>
             )}
@@ -150,29 +168,28 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                 className="py-8"
               >
                 <motion.div
-                  className="text-8xl mb-6"
+                  className="text-8xl mb-6 relative"
                   animate={{ 
                     scale: [1, 1.2, 1],
                     rotate: [0, 360],
-                    filter: ['brightness(1)', 'brightness(1.5)', 'brightness(1)']
                   }}
-                  transition={{ duration: 0.5, repeat: Infinity }}
+                  transition={{ duration: 0.8, repeat: Infinity }}
                 >
-                  🧺
+                  📦
+                  <motion.div
+                    className="absolute inset-0 text-6xl"
+                    animate={{ 
+                      scale: [0, 1.5, 0],
+                      opacity: [0, 1, 0],
+                    }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  >
+                    ✨
+                  </motion.div>
                 </motion.div>
                 <p className="text-xl text-green-400 font-semibold">
-                  Foraging through your chest...
+                  Opening chest...
                 </p>
-                <motion.div
-                  className="mt-4 text-6xl"
-                  animate={{ 
-                    rotate: 360,
-                    scale: [1, 1.3, 1]
-                  }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                >
-                  🌿
-                </motion.div>
               </motion.div>
             )}
             
@@ -196,39 +213,28 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                 
                 <div className="bg-gradient-to-r from-green-600/50 to-emerald-600/50 p-6 rounded-xl border border-green-400/30">
                   {levelUpInfo?.leveledUp ? (
-                    <>
+                    <div className="mb-4">
                       <h3 className="text-2xl font-bold text-yellow-400 mb-2">
                         🎉 Level Up! 🎉
                       </h3>
-                      <p className="text-xl mb-2 text-yellow-200">
-                        Level {levelUpInfo.newLevel} Reached!
+                      <p className="text-xl text-yellow-200">
+                        Level {levelUpInfo.newLevel}!
                       </p>
-                      <p className="text-lg mb-3 text-green-300">
-                        +{xpGained} XP & +1 $HROOM
-                      </p>
-                    </>
+                    </div>
                   ) : (
-                    <>
-                      <h3 className="text-2xl font-bold text-green-400 mb-2">
+                    <div className="mb-4">
+                      <h3 className="text-2xl font-bold text-green-400">
                         Great Find!
                       </h3>
-                      <p className="text-lg mb-2 text-blue-300">
-                        +{xpGained} XP gained!
-                      </p>
-                    </>
+                    </div>
                   )}
                   
-                  <p className="text-xl mb-3">
-                    {reward.name} {reward.amount && `x${reward.amount}`}
-                  </p>
-                  <Badge className={`mb-4 ${
-                    reward.rarity === 'Legendary' ? 'bg-yellow-500' :
-                    reward.rarity === 'Rare' ? 'bg-blue-500' : 'bg-gray-500'
-                  }`}>
-                    {reward.rarity}
-                  </Badge>
+                  <div className="mb-4">
+                    <p className="text-lg text-blue-300">+{xpGained} XP</p>
+                    <p className="text-lg">{reward.name}</p>
+                  </div>
                   
-                  <div className="space-y-3 mt-4">
+                  <div className="space-y-3">
                     <Button
                       onClick={handleClose}
                       className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"

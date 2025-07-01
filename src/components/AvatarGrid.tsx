@@ -27,7 +27,7 @@ const mockAvatars: Avatar[] = [
   {
     id: '1',
     name: 'Mystic Mushroom',
-    collection: 'Actrule Genesis',
+    collection: 'Genesis',
     rarity: 'Legendary',
     image: '🍄‍🟫',
     traits: ['Glowing Cap', 'Ancient Spores'],
@@ -36,7 +36,7 @@ const mockAvatars: Avatar[] = [
   {
     id: '2',
     name: 'Forest Sage',
-    collection: 'Actrule Mystics',
+    collection: 'Mystics',
     rarity: 'Rare',
     image: '🧙‍♂️',
     traits: ['Nature Magic', 'Woodland Wisdom'],
@@ -45,7 +45,7 @@ const mockAvatars: Avatar[] = [
   {
     id: '3',
     name: 'Spore Keeper',
-    collection: 'Actrule Commons',
+    collection: 'Commons',
     rarity: 'Common',
     image: '🌱',
     traits: ['Growth Power', 'Life Energy'],
@@ -54,7 +54,7 @@ const mockAvatars: Avatar[] = [
   {
     id: '4',
     name: 'Crystal Mushroom',
-    collection: 'Actrule Elementals',
+    collection: 'Elementals',
     rarity: 'Rare',
     image: '💎',
     traits: ['Crystalline Structure', 'Light Refraction'],
@@ -63,7 +63,7 @@ const mockAvatars: Avatar[] = [
   {
     id: '5',
     name: 'Shadow Spore',
-    collection: 'Actrule Dark',
+    collection: 'Dark',
     rarity: 'Legendary',
     image: '🖤',
     traits: ['Shadow Form', 'Dark Energy'],
@@ -72,7 +72,7 @@ const mockAvatars: Avatar[] = [
   {
     id: '6',
     name: 'Golden Truffle',
-    collection: 'Actrule Rare',
+    collection: 'Rare',
     rarity: 'Rare',
     image: '🏆',
     traits: ['Golden Sheen', 'Rare Find'],
@@ -115,7 +115,7 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
         >
           🍄
         </motion.div>
-        <p className="text-green-200 text-xl">Foraging through your collection...</p>
+        <p className="text-green-200 text-xl">Loading your collection...</p>
       </div>
     );
   }
@@ -140,12 +140,12 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
         >
           🔍
         </motion.div>
-        <h3 className="text-2xl font-bold text-white mb-4">No Actrule NFTs Found</h3>
+        <h3 className="text-2xl font-bold text-white mb-4">No NFTs Found</h3>
         <p className="text-green-200 mb-6">
-          We couldn't find any Actrule NFTs in your wallet. 
+          We couldn't find any NFTs in your wallet. 
         </p>
         <p className="text-green-300 text-sm">
-          Showing demo collection so you can explore the forage chest experience!
+          Showing demo collection so you can explore the chest experience!
         </p>
       </div>
     );
@@ -193,7 +193,6 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
               </motion.div>
               
               <h3 className="text-xl font-bold text-white mb-2">{avatar.name}</h3>
-              <p className="text-green-200 text-sm mb-3">{avatar.collection}</p>
               
               <div className="flex justify-center mb-3">
                 <Badge className={`${rarityColors[avatar.rarity]} text-white`}>
@@ -228,7 +227,7 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                🧺 {avatar.lootBoxesAvailable} Chest{avatar.lootBoxesAvailable !== 1 ? 's' : ''} Available
+                📦 {avatar.lootBoxesAvailable} Chest{avatar.lootBoxesAvailable !== 1 ? 's' : ''} Available
               </motion.div>
             </div>
           </Card>
