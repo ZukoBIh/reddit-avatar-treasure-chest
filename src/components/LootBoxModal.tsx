@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface Reward {
   type: 'token' | 'nft' | 'xp' | 'badge';
@@ -34,11 +35,17 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
   const [isOpening, setIsOpening] = useState(false);
   const [reward, setReward] = useState<Reward | null>(null);
   const [showReward, setShowReward] = useState(false);
+  const [xpGained, setXpGained] = useState(0);
+  const [levelUpInfo, setLevelUpInfo] = useState<{leveledUp: boolean, newLevel: number} | null>(null);
+  
+  const { addXP } = useUserProfile();
 
   const resetState = () => {
     setIsOpening(false);
     setReward(null);
     setShowReward(false);
+    setXpGained(0);
+    setLevelUpInfo(null);
   };
 
   const openForageChest = async () => {
@@ -47,16 +54,32 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     // Simulate forage chest opening delay
     await new Promise(resolve => setTimeout(resolve, 3000));
     
+    // Generate random XP between 10-30
+    const randomXP = Math.floor(Math.random() * 21) + 10;
+    setXpGained(randomXP);
+    
+    // Add XP and check for level up
+    const levelResult = addXP(randomXP);
+    setLevelUpInfo(levelResult);
+    
     // Randomly select a reward (with rarity weighting)
     const randomReward = possibleRewards[Math.floor(Math.random() * possibleRewards.length)];
     setReward(randomReward);
     setIsOpening(false);
     setShowReward(true);
     
-    toast({
-      title: "Foraged Successfully! 🍄",
-      description: `You discovered ${randomReward.name}${randomReward.amount ? ` x${randomReward.amount}` : ''}!`,
-    });
+    // Show appropriate toast based on level up
+    if (levelResult.leveledUp) {
+      toast({
+        title: "Level Up! 🎉",
+        description: `You reached Level ${levelResult.newLevel} and earned 1 $HROOM! Plus ${randomXP} XP!`,
+      });
+    } else {
+      toast({
+        title: "Foraged Successfully! 🍄",
+        description: `You gained ${randomXP} XP and discovered ${randomReward.name}${randomReward.amount ? ` x${randomReward.amount}` : ''}!`,
+      });
+    }
   };
 
   const handleClose = () => {
@@ -172,9 +195,29 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                 </motion.div>
                 
                 <div className="bg-gradient-to-r from-green-600/50 to-emerald-600/50 p-6 rounded-xl border border-green-400/30">
-                  <h3 className="text-2xl font-bold text-green-400 mb-2">
-                    Great Find!
-                  </h3>
+                  {levelUpInfo?.leveledUp ? (
+                    <>
+                      <h3 className="text-2xl font-bold text-yellow-400 mb-2">
+                        🎉 Level Up! 🎉
+                      </h3>
+                      <p className="text-xl mb-2 text-yellow-200">
+                        Level {levelUpInfo.newLevel} Reached!
+                      </p>
+                      <p className="text-lg mb-3 text-green-300">
+                        +{xpGained} XP & +1 $HROOM
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-2xl font-bold text-green-400 mb-2">
+                        Great Find!
+                      </h3>
+                      <p className="text-lg mb-2 text-blue-300">
+                        +{xpGained} XP gained!
+                      </p>
+                    </>
+                  )}
+                  
                   <p className="text-xl mb-3">
                     {reward.name} {reward.amount && `x${reward.amount}`}
                   </p>
@@ -196,6 +239,8 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                       onClick={() => {
                         setShowReward(false);
                         setReward(null);
+                        setXpGained(0);
+                        setLevelUpInfo(null);
                       }}
                       variant="outline"
                       className="w-full border-green-400 text-green-300 hover:bg-green-500/20"

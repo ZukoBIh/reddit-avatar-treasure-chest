@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import WalletConnection from '../components/WalletConnection';
 import AvatarGrid from '../components/AvatarGrid';
 import LootBoxModal from '../components/LootBoxModal';
+import ProfileBar from '../components/ProfileBar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -72,7 +72,7 @@ const Index = () => {
             </motion.div>
           </div>
           <p className="text-xl text-green-200 max-w-2xl mx-auto">
-            Connect your wallet and discover magical rewards hidden in your Actrule NFT collection!
+            Connect your wallet and discover magical rewards hidden in your NFT collection!
           </p>
         </motion.header>
 
@@ -101,7 +101,7 @@ const Index = () => {
                     Ready to Forage for Treasures?
                   </h2>
                   <p className="text-green-200 mb-6">
-                    Connect your wallet to discover which Actrule NFTs you own and unlock their magical forage chests!
+                    Connect your wallet to discover which NFTs you own and unlock their magical forage chests!
                   </p>
                   <WalletConnection onConnect={() => setIsWalletConnected(true)} />
                 </div>
@@ -113,12 +113,13 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
+              <ProfileBar />
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-white mb-4">
                   Your NFT Collection
                 </h2>
                 <p className="text-green-200">
-                  Click on any NFT to open its forage chest!
+                  Click on any NFT to open its forage chest and earn XP!
                 </p>
               </div>
               <AvatarGrid onAvatarSelect={handleAvatarSelect} />
