@@ -115,7 +115,7 @@ const Index = () => {
             >
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-white mb-4">
-                  Your Actrule Collection
+                  Your NFT Collection
                 </h2>
                 <p className="text-green-200">
                   Click on any NFT to open its forage chest!
