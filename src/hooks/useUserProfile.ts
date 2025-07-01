@@ -1,8 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
+  id: string;
   walletAddress: string;
   level: number;
   currentXP: number;
@@ -10,40 +12,56 @@ interface UserProfile {
   totalSpores: number;
 }
 
-const STORAGE_KEY = 'mushroom_forage_profiles';
 const XP_PER_LEVEL = 100;
 
 export const useUserProfile = () => {
   const { address } = useAccount();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const getStoredProfiles = (): Record<string, UserProfile> => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : {};
-    } catch {
-      return {};
-    }
-  };
-
-  const saveProfile = (updatedProfile: UserProfile) => {
-    const profiles = getStoredProfiles();
-    profiles[updatedProfile.walletAddress] = updatedProfile;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
-    setProfile(updatedProfile);
-  };
-
-  const initializeProfile = (walletAddress: string): UserProfile => {
-    return {
-      walletAddress,
+  const createProfile = async (walletAddress: string): Promise<UserProfile> => {
+    const newProfile = {
+      wallet_address: walletAddress,
       level: 1,
-      currentXP: 0,
-      totalHroom: 0,
-      totalSpores: 0,
+      current_xp: 0,
+      total_hroom: 0,
+      total_spores: 0,
+    };
+
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .insert(newProfile)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return {
+      id: data.id,
+      walletAddress: data.wallet_address,
+      level: data.level,
+      currentXP: data.current_xp,
+      totalHroom: data.total_hroom,
+      totalSpores: data.total_spores,
     };
   };
 
-  const addXP = (xpGained: number) => {
+  const updateProfile = async (updatedProfile: UserProfile) => {
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({
+        level: updatedProfile.level,
+        current_xp: updatedProfile.currentXP,
+        total_hroom: updatedProfile.totalHroom,
+        total_spores: updatedProfile.totalSpores,
+      })
+      .eq('wallet_address', updatedProfile.walletAddress);
+
+    if (error) throw error;
+    setProfile(updatedProfile);
+  };
+
+  const addXP = async (xpGained: number) => {
     if (!profile) return { leveledUp: false, newLevel: 1 };
 
     const newXP = profile.currentXP + xpGained;
@@ -55,9 +73,10 @@ export const useUserProfile = () => {
       currentXP: newXP,
       level: newLevel,
       totalHroom: leveledUp ? profile.totalHroom + 1 : profile.totalHroom,
+      totalSpores: profile.totalSpores + Math.floor(xpGained / 5), // Earn spores based on XP
     };
 
-    saveProfile(updatedProfile);
+    await updateProfile(updatedProfile);
     
     return { leveledUp, newLevel };
   };
@@ -73,23 +92,49 @@ export const useUserProfile = () => {
   };
 
   useEffect(() => {
-    if (address) {
-      const profiles = getStoredProfiles();
-      const existingProfile = profiles[address];
-      
-      if (existingProfile) {
-        setProfile(existingProfile);
-      } else {
-        const newProfile = initializeProfile(address);
-        saveProfile(newProfile);
+    const loadProfile = async () => {
+      if (!address) {
+        setProfile(null);
+        return;
       }
-    } else {
-      setProfile(null);
-    }
+
+      setIsLoading(true);
+
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('wallet_address', address)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+          setProfile({
+            id: data.id,
+            walletAddress: data.wallet_address,
+            level: data.level,
+            currentXP: data.current_xp,
+            totalHroom: data.total_hroom,
+            totalSpores: data.total_spores,
+          });
+        } else {
+          const newProfile = await createProfile(address);
+          setProfile(newProfile);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProfile();
   }, [address]);
 
   return {
     profile,
+    isLoading,
     addXP,
     getXPForCurrentLevel,
     getShortAddress,

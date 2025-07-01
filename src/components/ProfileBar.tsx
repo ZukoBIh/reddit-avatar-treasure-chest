@@ -7,7 +7,22 @@ import { Progress } from '@/components/ui/progress';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 const ProfileBar: React.FC = () => {
-  const { profile, getXPForCurrentLevel, getShortAddress } = useUserProfile();
+  const { profile, getXPForCurrentLevel, getShortAddress, isLoading } = useUserProfile();
+
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-6"
+      >
+        <Card className="p-4 bg-black/20 backdrop-blur-sm border-green-500/30">
+          <div className="text-center text-green-200">Loading profile...</div>
+        </Card>
+      </motion.div>
+    );
+  }
 
   if (!profile) return null;
 
@@ -46,6 +61,9 @@ const ProfileBar: React.FC = () => {
               </Badge>
               <Badge variant="outline" className="border-green-400 text-green-200">
                 🍄 {profile.totalHroom} $HROOM
+              </Badge>
+              <Badge variant="outline" className="border-blue-400 text-blue-200">
+                🌱 {profile.totalSpores} $SPORE
               </Badge>
             </div>
 

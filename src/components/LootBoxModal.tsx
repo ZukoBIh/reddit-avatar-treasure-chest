@@ -59,7 +59,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     setXpGained(randomXP);
     
     // Add XP and check for level up
-    const levelResult = addXP(randomXP);
+    const levelResult = await addXP(randomXP);
     setLevelUpInfo(levelResult);
     
     // Randomly select a reward
@@ -119,6 +119,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
+                className="flex flex-col items-center"
               >
                 <motion.div
                   className="text-8xl mb-6 relative"
@@ -128,9 +129,9 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  📦
+                  🧰
                   <motion.div
-                    className="absolute -top-2 -right-2 text-3xl"
+                    className="absolute -top-2 -right-2 text-2xl"
                     animate={{ 
                       rotate: [0, 15, -15, 0],
                       scale: [1, 1.2, 1]
@@ -165,7 +166,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="py-8"
+                className="flex flex-col items-center py-8"
               >
                 <motion.div
                   className="text-8xl mb-6 relative"
@@ -175,7 +176,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                   }}
                   transition={{ duration: 0.8, repeat: Infinity }}
                 >
-                  📦
+                  🧰
                   <motion.div
                     className="absolute inset-0 text-6xl"
                     animate={{ 
@@ -188,7 +189,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                   </motion.div>
                 </motion.div>
                 <p className="text-xl text-green-400 font-semibold">
-                  Opening chest...
+                  Opening...
                 </p>
               </motion.div>
             )}
@@ -199,6 +200,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                 initial={{ opacity: 0, scale: 0.5, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ type: "spring", damping: 10, stiffness: 100 }}
+                className="flex flex-col items-center"
               >
                 <motion.div
                   className="text-8xl mb-4"
@@ -211,9 +213,9 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                   {reward.icon}
                 </motion.div>
                 
-                <div className="bg-gradient-to-r from-green-600/50 to-emerald-600/50 p-6 rounded-xl border border-green-400/30">
-                  {levelUpInfo?.leveledUp ? (
-                    <div className="mb-4">
+                <div className="bg-gradient-to-r from-green-600/50 to-emerald-600/50 p-6 rounded-xl border border-green-400/30 w-full">
+                  {levelUpInfo?.leveledUp && (
+                    <div className="mb-4 text-center">
                       <h3 className="text-2xl font-bold text-yellow-400 mb-2">
                         🎉 Level Up! 🎉
                       </h3>
@@ -221,15 +223,9 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                         Level {levelUpInfo.newLevel}!
                       </p>
                     </div>
-                  ) : (
-                    <div className="mb-4">
-                      <h3 className="text-2xl font-bold text-green-400">
-                        Great Find!
-                      </h3>
-                    </div>
                   )}
                   
-                  <div className="mb-4">
+                  <div className="mb-4 text-center">
                     <p className="text-lg text-blue-300">+{xpGained} XP</p>
                     <p className="text-lg">{reward.name}</p>
                   </div>
