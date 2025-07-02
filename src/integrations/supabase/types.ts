@@ -9,11 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chest_cooldowns: {
+        Row: {
+          created_at: string
+          id: string
+          last_opened_at: string
+          nft_id: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_opened_at?: string
+          nft_id: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_opened_at?: string
+          nft_id?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           created_at: string
           current_xp: number
           id: string
+          is_admin: boolean
           level: number
           total_hroom: number
           total_spores: number
@@ -24,6 +49,7 @@ export type Database = {
           created_at?: string
           current_xp?: number
           id?: string
+          is_admin?: boolean
           level?: number
           total_hroom?: number
           total_spores?: number
@@ -34,6 +60,7 @@ export type Database = {
           created_at?: string
           current_xp?: number
           id?: string
+          is_admin?: boolean
           level?: number
           total_hroom?: number
           total_spores?: number

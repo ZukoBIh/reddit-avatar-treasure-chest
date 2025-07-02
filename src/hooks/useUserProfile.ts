@@ -10,6 +10,7 @@ interface UserProfile {
   currentXP: number;
   totalHroom: number;
   totalSpores: number;
+  isAdmin: boolean;
 }
 
 const XP_PER_LEVEL = 100;
@@ -26,6 +27,7 @@ export const useUserProfile = () => {
       current_xp: 0,
       total_hroom: 0,
       total_spores: 0,
+      is_admin: false,
     };
 
     const { data, error } = await supabase
@@ -43,6 +45,7 @@ export const useUserProfile = () => {
       currentXP: data.current_xp,
       totalHroom: data.total_hroom,
       totalSpores: data.total_spores,
+      isAdmin: data.is_admin,
     };
   };
 
@@ -54,6 +57,7 @@ export const useUserProfile = () => {
         current_xp: updatedProfile.currentXP,
         total_hroom: updatedProfile.totalHroom,
         total_spores: updatedProfile.totalSpores,
+        is_admin: updatedProfile.isAdmin,
       })
       .eq('wallet_address', updatedProfile.walletAddress);
 
@@ -117,6 +121,7 @@ export const useUserProfile = () => {
             currentXP: data.current_xp,
             totalHroom: data.total_hroom,
             totalSpores: data.total_spores,
+            isAdmin: data.is_admin,
           });
         } else {
           const newProfile = await createProfile(address);

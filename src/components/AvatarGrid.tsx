@@ -1,11 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAccount } from 'wagmi';
 import { useQuery } from '@tanstack/react-query';
 import { fetchActruleNFTs } from '@/utils/nftUtils';
+import { useChestCooldown } from '@/hooks/useChestCooldown';
+import AdminPanel from './AdminPanel';
 
 interface Avatar {
   id: string;
@@ -88,6 +90,8 @@ const rarityColors = {
 
 const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
   const { address, isConnected } = useAccount();
+  const { getCooldownStatus } = useChestCooldown();
+  const [avatarRarities, setAvatarRarities] = useState<Record<string, 'Common' | 'Rare' | 'Legendary'>>({});
 
   const { data: nfts, isLoading, error } = useQuery({
     queryKey: ['actrule-nfts', address],
@@ -96,14 +100,31 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
     refetchOnWindowFocus: false,
   });
 
-  console.log('Connected wallet address:', address);
-  console.log('Is connected:', isConnected);
-  console.log('NFTs data:', nfts);
-  console.log('Is loading:', isLoading);
-  console.log('Error:', error);
-
   // Use real NFTs if available, otherwise fall back to mock data
-  const avatarsToShow = nfts && nfts.length > 0 ? nfts : mockAvatars;
+  const baseAvatars = nfts && nfts.length > 0 ? nfts : mockAvatars;
+  
+  // Apply admin rarity overrides
+  const avatarsToShow = baseAvatars.map(avatar => ({
+    ...avatar,
+    rarity: avatarRarities[avatar.id] || avatar.rarity,
+    lootBoxesAvailable: avatarRarities[avatar.id] 
+      ? (avatarRarities[avatar.id] === 'Legendary' ? 3 : avatarRarities[avatar.id] === 'Rare' ? 2 : 1)
+      : avatar.lootBoxesAvailable
+  }));
+
+  const handleRarityChange = (avatarId: string, newRarity: 'Common' | 'Rare' | 'Legendary') => {
+    setAvatarRarities(prev => ({ ...prev, [avatarId]: newRarity }));
+  };
+
+  const handleAvatarClick = (avatar: Avatar) => {
+    const { canOpen, remainingTime } = getCooldownStatus(avatar.id, avatar.rarity);
+    
+    if (!canOpen) {
+      return; // Don't open if on cooldown
+    }
+    
+    onAvatarSelect(avatar);
+  };
 
   if (isLoading) {
     return (
@@ -152,87 +173,107 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-      {avatarsToShow.map((avatar, index) => (
-        <motion.div
-          key={avatar.id}
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: index * 0.1 }}
-          whileHover={{ scale: 1.05, rotateY: 5 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => onAvatarSelect(avatar)}
-          className="cursor-pointer"
-        >
-          <Card className="p-6 bg-black/30 backdrop-blur-sm border-green-500/30 hover:border-green-400/60 transition-all duration-300">
-            <div className="text-center">
-              <motion.div
-                className="mb-4 flex justify-center items-center h-20"
-                animate={{ 
-                  rotate: [0, 5, -5, 0],
-                  scale: [1, 1.1, 1]
-                }}
-                transition={{ 
-                  duration: 3, 
-                  repeat: Infinity,
-                  repeatType: "reverse"
-                }}
-              >
-                {avatar.image.startsWith('http') ? (
-                  <img 
-                    src={avatar.image} 
-                    alt={avatar.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="50">🍄</text></svg>';
+    <div className="max-w-6xl mx-auto">
+      <AdminPanel avatars={avatarsToShow} onRarityChange={handleRarityChange} />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {avatarsToShow.map((avatar, index) => {
+          const { canOpen, remainingTime } = getCooldownStatus(avatar.id, avatar.rarity);
+          
+          return (
+            <motion.div
+              key={avatar.id}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              whileHover={canOpen ? { scale: 1.05, rotateY: 5 } : {}}
+              whileTap={canOpen ? { scale: 0.95 } : {}}
+              onClick={() => handleAvatarClick(avatar)}
+              className={`cursor-pointer ${!canOpen ? 'opacity-50' : ''}`}
+            >
+              <Card className={`p-6 bg-black/30 backdrop-blur-sm border-green-500/30 hover:border-green-400/60 transition-all duration-300 ${!canOpen ? 'border-red-500/30' : ''}`}>
+                <div className="text-center">
+                  <motion.div
+                    className="mb-4 flex justify-center items-center h-20 relative"
+                    animate={canOpen ? { 
+                      rotate: [0, 5, -5, 0],
+                      scale: [1, 1.1, 1]
+                    } : {}}
+                    transition={{ 
+                      duration: 3, 
+                      repeat: Infinity,
+                      repeatType: "reverse"
                     }}
-                  />
-                ) : (
-                  <span className="text-6xl">{avatar.image}</span>
-                )}
-              </motion.div>
-              
-              <h3 className="text-xl font-bold text-white mb-2">{avatar.name}</h3>
-              
-              <div className="flex justify-center mb-3">
-                <Badge className={`${rarityColors[avatar.rarity]} text-white`}>
-                  {avatar.rarity}
-                </Badge>
-              </div>
-              
-              <div className="mb-4">
-                <p className="text-xs text-green-300 mb-1">Traits:</p>
-                <div className="flex flex-wrap gap-1 justify-center max-h-20 overflow-y-auto">
-                  {avatar.traits.slice(0, 3).map((trait, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs border-green-400 text-green-200">
-                      {trait.length > 15 ? trait.substring(0, 15) + '...' : trait}
+                  >
+                    {avatar.image.startsWith('http') ? (
+                      <img 
+                        src={avatar.image} 
+                        alt={avatar.name}
+                        className="w-16 h-16 rounded-lg object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="50">🍄</text></svg>';
+                        }}
+                      />
+                    ) : (
+                      <span className="text-6xl">{avatar.image}</span>
+                    )}
+                    
+                    {!canOpen && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+                        <span className="text-red-400 text-2xl">🔒</span>
+                      </div>
+                    )}
+                  </motion.div>
+                  
+                  <h3 className="text-xl font-bold text-white mb-2">{avatar.name}</h3>
+                  
+                  <div className="flex justify-center mb-3">
+                    <Badge className={`${rarityColors[avatar.rarity]} text-white`}>
+                      {avatar.rarity}
                     </Badge>
-                  ))}
-                  {avatar.traits.length > 3 && (
-                    <Badge variant="outline" className="text-xs border-green-400 text-green-200">
-                      +{avatar.traits.length - 3} more
-                    </Badge>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <p className="text-xs text-green-300 mb-1">Traits:</p>
+                    <div className="flex flex-wrap gap-1 justify-center max-h-20 overflow-y-auto">
+                      {avatar.traits.slice(0, 3).map((trait, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs border-green-400 text-green-200">
+                          {trait.length > 15 ? trait.substring(0, 15) + '...' : trait}
+                        </Badge>
+                      ))}
+                      {avatar.traits.length > 3 && (
+                        <Badge variant="outline" className="text-xs border-green-400 text-green-200">
+                          +{avatar.traits.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {canOpen ? (
+                    <motion.div
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-lg font-semibold"
+                      animate={{ 
+                        boxShadow: [
+                          '0 0 10px rgba(34, 197, 94, 0.5)',
+                          '0 0 20px rgba(34, 197, 94, 0.8)',
+                          '0 0 10px rgba(34, 197, 94, 0.5)'
+                        ]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      📦 {avatar.lootBoxesAvailable} Chest{avatar.lootBoxesAvailable !== 1 ? 's' : ''} Available
+                    </motion.div>
+                  ) : (
+                    <div className="bg-red-500/50 text-white px-3 py-2 rounded-lg font-semibold">
+                      ⏰ {remainingTime}h remaining
+                    </div>
                   )}
                 </div>
-              </div>
-              
-              <motion.div
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-lg font-semibold"
-                animate={{ 
-                  boxShadow: [
-                    '0 0 10px rgba(34, 197, 94, 0.5)',
-                    '0 0 20px rgba(34, 197, 94, 0.8)',
-                    '0 0 10px rgba(34, 197, 94, 0.5)'
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                📦 {avatar.lootBoxesAvailable} Chest{avatar.lootBoxesAvailable !== 1 ? 's' : ''} Available
-              </motion.div>
-            </div>
-          </Card>
-        </motion.div>
-      ))}
+              </Card>
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
   );
 };

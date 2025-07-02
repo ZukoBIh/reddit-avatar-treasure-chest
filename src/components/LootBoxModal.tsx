@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useChestCooldown } from '@/hooks/useChestCooldown';
 
 interface Reward {
   type: 'token' | 'nft' | 'xp' | 'badge';
@@ -31,6 +32,12 @@ const possibleRewards: Reward[] = [
   { type: 'token', name: '$HROOM', amount: 500, rarity: 'Legendary', icon: '🍄' },
 ];
 
+const XP_MULTIPLIERS = {
+  Common: 1,
+  Rare: 2,
+  Legendary: 3
+};
+
 const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) => {
   const [isOpening, setIsOpening] = useState(false);
   const [reward, setReward] = useState<Reward | null>(null);
@@ -39,6 +46,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
   const [levelUpInfo, setLevelUpInfo] = useState<{leveledUp: boolean, newLevel: number} | null>(null);
   
   const { addXP } = useUserProfile();
+  const { updateCooldown, getCooldownStatus } = useChestCooldown();
 
   const resetState = () => {
     setIsOpening(false);
@@ -49,18 +57,36 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
   };
 
   const openChest = async () => {
+    if (!avatar) return;
+
+    // Check cooldown status
+    const { canOpen } = getCooldownStatus(avatar.id, avatar.rarity);
+    if (!canOpen) {
+      toast({
+        title: "Chest on Cooldown",
+        description: "This chest is still on cooldown. Please wait before opening again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsOpening(true);
     
     // Simulate chest opening delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Generate random XP between 10-30
-    const randomXP = Math.floor(Math.random() * 21) + 10;
-    setXpGained(randomXP);
+    // Calculate XP based on rarity
+    const baseXP = Math.floor(Math.random() * 21) + 10; // 10-30 base XP
+    const multiplier = XP_MULTIPLIERS[avatar.rarity];
+    const finalXP = baseXP * multiplier;
+    setXpGained(finalXP);
     
     // Add XP and check for level up
-    const levelResult = await addXP(randomXP);
+    const levelResult = await addXP(finalXP);
     setLevelUpInfo(levelResult);
+    
+    // Update cooldown
+    await updateCooldown(avatar.id);
     
     // Randomly select a reward
     const randomReward = possibleRewards[Math.floor(Math.random() * possibleRewards.length)];
@@ -72,12 +98,12 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     if (levelResult.leveledUp) {
       toast({
         title: "Level Up! 🎉",
-        description: `Level ${levelResult.newLevel} reached! +${randomXP} XP & +1 $HROOM!`,
+        description: `Level ${levelResult.newLevel} reached! +${finalXP} XP (${avatar.rarity} bonus)!`,
       });
     } else {
       toast({
         title: "Chest Opened! 📦",
-        description: `+${randomXP} XP gained!`,
+        description: `+${finalXP} XP gained (${avatar.rarity} bonus)!`,
       });
     }
   };
@@ -110,9 +136,16 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
             🍄
           </motion.div>
           
-          <h2 className="text-2xl font-bold mb-6">
+          <h2 className="text-2xl font-bold mb-2">
             {typeof avatar.name === 'string' ? avatar.name : 'Mushroom Chest'}
           </h2>
+          
+          <Badge className={`mb-4 ${
+            avatar.rarity === 'Common' ? 'bg-gray-500' :
+            avatar.rarity === 'Rare' ? 'bg-blue-500' : 'bg-yellow-500'
+          }`}>
+            {avatar.rarity} - {XP_MULTIPLIERS[avatar.rarity]}x XP
+          </Badge>
           
           <AnimatePresence mode="wait">
             {!isOpening && !showReward && (
@@ -229,6 +262,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                   
                   <div className="mb-4 text-center">
                     <p className="text-lg text-blue-300">+{xpGained} XP</p>
+                    <p className="text-sm text-green-300">({avatar.rarity} {XP_MULTIPLIERS[avatar.rarity]}x bonus)</p>
                     <p className="text-lg">{reward.name}</p>
                   </div>
                   
