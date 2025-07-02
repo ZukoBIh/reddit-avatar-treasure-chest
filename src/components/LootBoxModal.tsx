@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useChestCooldown } from '@/hooks/useChestCooldown';
+import { LootBoxHeader } from './loot-box/LootBoxHeader';
+import { UnOpenedState } from './loot-box/UnOpenedState';
+import { OpeningState } from './loot-box/OpeningState';
+import { RewardDisplay } from './loot-box/RewardDisplay';
 
 interface Reward {
   type: 'token' | 'nft' | 'xp' | 'badge';
@@ -113,6 +115,13 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     onClose();
   };
 
+  const handleOpenAnother = () => {
+    setShowReward(false);
+    setReward(null);
+    setXpGained(0);
+    setLevelUpInfo(null);
+  };
+
   useEffect(() => {
     if (!isOpen) {
       resetState();
@@ -128,166 +137,27 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
         <DialogDescription className="sr-only">Open your treasure chest to discover rewards</DialogDescription>
         
         <div className="text-center p-6">
-          <motion.div
-            className="text-4xl mb-4"
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 1, repeat: Infinity }}
-          >
-            🍄
-          </motion.div>
+          <div className="text-4xl mb-4">🍄</div>
           
-          <h2 className="text-2xl font-bold mb-2">
-            {typeof avatar.name === 'string' ? avatar.name : 'Mushroom Chest'}
-          </h2>
-          
-          <Badge className={`mb-4 ${
-            avatar.rarity === 'Common' ? 'bg-gray-500' :
-            avatar.rarity === 'Rare' ? 'bg-blue-500' : 'bg-yellow-500'
-          }`}>
-            {avatar.rarity} - {XP_MULTIPLIERS[avatar.rarity]}x XP
-          </Badge>
+          <LootBoxHeader avatar={avatar} xpMultipliers={XP_MULTIPLIERS} />
           
           <AnimatePresence mode="wait">
             {!isOpening && !showReward && (
-              <motion.div
-                key="unopened"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="flex flex-col items-center"
-              >
-                <motion.div
-                  className="text-8xl mb-6 relative"
-                  whileHover={{ scale: 1.1 }}
-                  animate={{ 
-                    rotateY: [0, 10, -10, 0],
-                  }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  🍄
-                  <motion.div
-                    className="absolute -top-2 -right-2 text-2xl"
-                    animate={{ 
-                      rotate: [0, 15, -15, 0],
-                      scale: [1, 1.2, 1]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                  >
-                    ✨
-                  </motion.div>
-                  <motion.div
-                    className="absolute -bottom-2 -left-2 text-2xl"
-                    animate={{ 
-                      rotate: [0, -10, 10, 0],
-                      scale: [1, 1.1, 1]
-                    }}
-                    transition={{ duration: 2.5, repeat: Infinity, delay: 1 }}
-                  >
-                    🌱
-                  </motion.div>
-                </motion.div>
-                <Button
-                  onClick={openChest}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 px-8 rounded-xl text-lg"
-                >
-                  Open Chest!
-                </Button>
-              </motion.div>
+              <UnOpenedState onOpenChest={openChest} />
             )}
             
-            {isOpening && (
-              <motion.div
-                key="opening"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center py-8"
-              >
-                <motion.div
-                  className="text-8xl mb-6 relative"
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 360],
-                  }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
-                >
-                  🍄
-                  <motion.div
-                    className="absolute inset-0 text-6xl"
-                    animate={{ 
-                      scale: [0, 1.5, 0],
-                      opacity: [0, 1, 0],
-                    }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  >
-                    ✨
-                  </motion.div>
-                </motion.div>
-                <p className="text-xl text-green-400 font-semibold">
-                  Opening...
-                </p>
-              </motion.div>
-            )}
+            {isOpening && <OpeningState />}
             
             {showReward && reward && (
-              <motion.div
-                key="reward"
-                initial={{ opacity: 0, scale: 0.5, y: 50 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ type: "spring", damping: 10, stiffness: 100 }}
-                className="flex flex-col items-center"
-              >
-                <motion.div
-                  className="text-8xl mb-4"
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 360],
-                  }}
-                  transition={{ duration: 0.8 }}
-                >
-                  {reward.icon}
-                </motion.div>
-                
-                <div className="bg-gradient-to-r from-green-600/50 to-emerald-600/50 p-6 rounded-xl border border-green-400/30 w-full">
-                  {levelUpInfo?.leveledUp && (
-                    <div className="mb-4 text-center">
-                      <h3 className="text-2xl font-bold text-yellow-400 mb-2">
-                        🎉 Level Up! 🎉
-                      </h3>
-                      <p className="text-xl text-yellow-200">
-                        Level {levelUpInfo.newLevel}!
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="mb-4 text-center">
-                    <p className="text-lg text-blue-300">+{xpGained} XP</p>
-                    <p className="text-sm text-green-300">({avatar.rarity} {XP_MULTIPLIERS[avatar.rarity]}x bonus)</p>
-                    <p className="text-lg">{reward.name}</p>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Button
-                      onClick={handleClose}
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                    >
-                      Collect Reward
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setShowReward(false);
-                        setReward(null);
-                        setXpGained(0);
-                        setLevelUpInfo(null);
-                      }}
-                      variant="outline"
-                      className="w-full border-green-400 text-green-300 hover:bg-green-500/20"
-                    >
-                      Open Another Chest
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
+              <RewardDisplay 
+                reward={reward}
+                xpGained={xpGained}
+                avatar={avatar}
+                levelUpInfo={levelUpInfo}
+                xpMultipliers={XP_MULTIPLIERS}
+                onClose={handleClose}
+                onOpenAnother={handleOpenAnother}
+              />
             )}
           </AnimatePresence>
         </div>
