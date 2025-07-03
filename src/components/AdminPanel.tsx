@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from '@/hooks/use-toast';
+import AdminRewardPanel from './AdminRewardPanel';
 
 interface Avatar {
   id: string;
@@ -44,12 +44,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-6"
+      className="mb-6 space-y-4"
     >
+      <AdminRewardPanel />
+      
       <Card className="p-6 bg-red-900/20 backdrop-blur-sm border-red-500/30">
         <div className="flex items-center gap-2 mb-4">
           <span className="text-2xl">⚙️</span>
-          <h2 className="text-xl font-bold text-white">Admin Panel</h2>
+          <h2 className="text-xl font-bold text-white">NFT Rarity Control</h2>
           <Badge className="bg-red-500 text-white">Admin Only</Badge>
         </div>
         

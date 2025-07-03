@@ -5,15 +5,16 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 import { toast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useChestCooldown } from '@/hooks/useChestCooldown';
+import { useRewardConfig } from '@/hooks/useRewardConfig';
 import { LootBoxHeader } from './loot-box/LootBoxHeader';
 import { UnOpenedState } from './loot-box/UnOpenedState';
 import { OpeningState } from './loot-box/OpeningState';
 import { RewardDisplay } from './loot-box/RewardDisplay';
 
 interface Reward {
-  type: 'token' | 'nft' | 'xp' | 'badge';
+  type: 'token' | 'xp';
   name: string;
-  amount?: number;
+  amount: number;
   rarity: 'Common' | 'Rare' | 'Legendary';
   icon: string;
 }
@@ -49,6 +50,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
   
   const { addXP } = useUserProfile();
   const { updateCooldown, getCooldownStatus } = useChestCooldown();
+  const { config } = useRewardConfig();
 
   const resetState = () => {
     setIsOpening(false);
@@ -59,7 +61,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
   };
 
   const openChest = async () => {
-    if (!avatar) return;
+    if (!avatar || !config) return;
 
     // Check cooldown status
     const { canOpen } = getCooldownStatus(avatar.id, avatar.rarity);
@@ -77,11 +79,27 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     // Simulate chest opening delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Calculate XP based on rarity
-    const baseXP = Math.floor(Math.random() * 21) + 10; // 10-30 base XP
+    // Calculate XP based on rarity and config
+    const baseXP = Math.floor(Math.random() * (config.baseXpMax - config.baseXpMin + 1)) + config.baseXpMin;
     const multiplier = XP_MULTIPLIERS[avatar.rarity];
     const finalXP = baseXP * multiplier;
     setXpGained(finalXP);
+    
+    // Check for token drop (very small chance)
+    const tokenDrop = Math.random() < config.tokenDropChance;
+    let tokenReward: Reward | null = null;
+    
+    if (tokenDrop) {
+      const tokenAmount = Math.floor(Math.random() * (config.tokenAmountMax - config.tokenAmountMin + 1)) + config.tokenAmountMin;
+      const isHroom = Math.random() < 0.5;
+      tokenReward = {
+        type: 'token',
+        name: isHroom ? '$HROOM' : '$SPORE',
+        amount: tokenAmount,
+        rarity: avatar.rarity,
+        icon: isHroom ? '🍄' : '🌱'
+      };
+    }
     
     // Add XP and check for level up
     const levelResult = await addXP(finalXP);
@@ -90,22 +108,35 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     // Update cooldown
     await updateCooldown(avatar.id);
     
-    // Randomly select a reward
-    const randomReward = possibleRewards[Math.floor(Math.random() * possibleRewards.length)];
-    setReward(randomReward);
+    // Set reward (XP always, token sometimes)
+    const mainReward: Reward = {
+      type: 'xp',
+      name: 'Experience Points',
+      amount: finalXP,
+      rarity: avatar.rarity,
+      icon: '⭐'
+    };
+    
+    setReward(tokenReward || mainReward);
     setIsOpening(false);
     setShowReward(true);
     
     // Show toast notification
+    let description = `+${finalXP} XP gained (${avatar.rarity} ${multiplier}x bonus)!`;
+    if (tokenReward) {
+      description += ` + ${tokenReward.amount} ${tokenReward.name}!`;
+    }
+    
     if (levelResult.leveledUp) {
+      description += ` Level ${levelResult.newLevel} reached! +${config.levelUpHroom} HROOM & +${config.levelUpSpore} SPORE!`;
       toast({
         title: "Level Up! 🎉",
-        description: `Level ${levelResult.newLevel} reached! +${finalXP} XP (${avatar.rarity} bonus)!`,
+        description,
       });
     } else {
       toast({
-        title: "Chest Opened! 📦",
-        description: `+${finalXP} XP gained (${avatar.rarity} bonus)!`,
+        title: tokenReward ? "Rare Drop! 📦✨" : "Chest Opened! 📦",
+        description,
       });
     }
   };
@@ -157,6 +188,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
                 xpMultipliers={XP_MULTIPLIERS}
                 onClose={handleClose}
                 onOpenAnother={handleOpenAnother}
+                config={config}
               />
             )}
           </AnimatePresence>

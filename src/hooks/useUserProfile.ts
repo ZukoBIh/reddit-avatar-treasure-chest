@@ -68,16 +68,28 @@ export const useUserProfile = () => {
   const addXP = async (xpGained: number) => {
     if (!profile) return { leveledUp: false, newLevel: 1 };
 
+    // Get reward config for level-up rewards
+    const { data: rewardConfig } = await supabase
+      .from('reward_config')
+      .select('level_up_hroom, level_up_spore')
+      .eq('config_type', 'default')
+      .single();
+
     const newXP = profile.currentXP + xpGained;
     const newLevel = Math.floor(newXP / XP_PER_LEVEL) + 1;
     const leveledUp = newLevel > profile.level;
+    
+    // Calculate level-up rewards
+    const levelsGained = leveledUp ? newLevel - profile.level : 0;
+    const hroomReward = levelsGained * (rewardConfig?.level_up_hroom || 100);
+    const sporeReward = levelsGained * (rewardConfig?.level_up_spore || 25);
     
     const updatedProfile = {
       ...profile,
       currentXP: newXP,
       level: newLevel,
-      totalHroom: leveledUp ? profile.totalHroom + 1 : profile.totalHroom,
-      totalSpores: profile.totalSpores + Math.floor(xpGained / 5), // Earn spores based on XP
+      totalHroom: profile.totalHroom + hroomReward,
+      totalSpores: profile.totalSpores + sporeReward,
     };
 
     await updateProfile(updatedProfile);

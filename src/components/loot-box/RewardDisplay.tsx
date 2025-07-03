@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 interface Reward {
-  type: 'token' | 'nft' | 'xp' | 'badge';
+  type: 'token' | 'xp';
   name: string;
-  amount?: number;
+  amount: number;
   rarity: 'Common' | 'Rare' | 'Legendary';
   icon: string;
 }
@@ -19,6 +19,7 @@ interface RewardDisplayProps {
   xpMultipliers: Record<string, number>;
   onClose: () => void;
   onOpenAnother: () => void;
+  config: any;
 }
 
 export const RewardDisplay: React.FC<RewardDisplayProps> = ({ 
@@ -28,8 +29,11 @@ export const RewardDisplay: React.FC<RewardDisplayProps> = ({
   levelUpInfo, 
   xpMultipliers,
   onClose, 
-  onOpenAnother 
+  onOpenAnother,
+  config
 }) => {
+  const isTokenReward = reward.type === 'token';
+  
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.5, y: 50 }}
@@ -41,9 +45,9 @@ export const RewardDisplay: React.FC<RewardDisplayProps> = ({
         className="text-8xl mb-4"
         animate={{ 
           scale: [1, 1.2, 1],
-          rotate: [0, 360],
+          rotate: isTokenReward ? [0, 360] : [0, 0],
         }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: isTokenReward ? 0.8 : 0.5 }}
       >
         {reward.icon}
       </motion.div>
@@ -57,6 +61,9 @@ export const RewardDisplay: React.FC<RewardDisplayProps> = ({
             <p className="text-xl text-yellow-200">
               Level {levelUpInfo.newLevel}!
             </p>
+            <p className="text-sm text-orange-300 mt-2">
+              +{config?.levelUpHroom || 100} $HROOM & +{config?.levelUpSpore || 25} $SPORE
+            </p>
           </div>
         )}
         
@@ -65,7 +72,20 @@ export const RewardDisplay: React.FC<RewardDisplayProps> = ({
           <p className="text-sm text-green-300">
             ({avatar.rarity} {xpMultipliers[avatar.rarity]}x bonus)
           </p>
-          <p className="text-lg">{reward.name}</p>
+          
+          {isTokenReward && (
+            <div className="mt-3 p-3 bg-yellow-500/20 rounded-lg border border-yellow-400/30">
+              <p className="text-lg font-bold text-yellow-300">
+                Bonus Drop! 🎉
+              </p>
+              <p className="text-xl text-yellow-100">
+                +{reward.amount} {reward.name}
+              </p>
+              <p className="text-xs text-yellow-200">
+                ({((config?.tokenDropChance || 0.05) * 100).toFixed(1)}% chance)
+              </p>
+            </div>
+          )}
         </div>
         
         <div className="space-y-3">
