@@ -25,16 +25,6 @@ interface LootBoxModalProps {
   avatar: any;
 }
 
-const possibleRewards: Reward[] = [
-  { type: 'token', name: '$HROOM', amount: 100, rarity: 'Common', icon: '🍄' },
-  { type: 'token', name: '$SPORE', amount: 50, rarity: 'Rare', icon: '🌱' },
-  { type: 'nft', name: 'Golden Mushroom', rarity: 'Legendary', icon: '🍄‍🟫' },
-  { type: 'xp', name: 'Foraging XP', amount: 250, rarity: 'Common', icon: '⭐' },
-  { type: 'badge', name: 'Master Forager', rarity: 'Rare', icon: '🏆' },
-  { type: 'nft', name: 'Mystical Spore', rarity: 'Rare', icon: '✨' },
-  { type: 'token', name: '$HROOM', amount: 500, rarity: 'Legendary', icon: '🍄' },
-];
-
 const XP_MULTIPLIERS = {
   Common: 1,
   Rare: 2,
