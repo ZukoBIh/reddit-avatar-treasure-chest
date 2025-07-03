@@ -1,3 +1,4 @@
+
 interface AlchemyNft {
   contract: {
     address: string;
@@ -38,6 +39,7 @@ interface Avatar {
   lootBoxesAvailable: number;
   contractAddress: string;
   tokenId: string;
+  totalOwned?: number;
 }
 
 // Known Actrule collection contract addresses
@@ -75,6 +77,12 @@ const getLootBoxCount = (rarity: 'Common' | 'Rare' | 'Legendary'): number => {
   }
 };
 
+const extractTokenNumber = (tokenId: string): number => {
+  // Extract numeric value from token ID
+  const num = parseInt(tokenId, 10);
+  return isNaN(num) ? 0 : num;
+};
+
 export const fetchActruleNFTs = async (walletAddress: string): Promise<Avatar[]> => {
   if (!walletAddress) {
     console.log('No wallet address provided');
@@ -102,25 +110,46 @@ export const fetchActruleNFTs = async (walletAddress: string): Promise<Avatar[]>
       return [];
     }
 
-    const avatars: Avatar[] = data.ownedNfts.map((nft: AlchemyNft) => {
-      const metadata = nft.raw?.metadata;
+    // Group NFTs by contract address to find the highest numbered one for each collection
+    const nftsByContract = new Map<string, AlchemyNft[]>();
+    
+    data.ownedNfts.forEach((nft: AlchemyNft) => {
+      const contractAddress = nft.contract.address;
+      if (!nftsByContract.has(contractAddress)) {
+        nftsByContract.set(contractAddress, []);
+      }
+      nftsByContract.get(contractAddress)!.push(nft);
+    });
+
+    const avatars: Avatar[] = [];
+
+    // For each contract, find the highest numbered NFT
+    nftsByContract.forEach((nfts, contractAddress) => {
+      const highestNft = nfts.reduce((highest, current) => {
+        const currentNum = extractTokenNumber(current.tokenId);
+        const highestNum = extractTokenNumber(highest.tokenId);
+        return currentNum > highestNum ? current : highest;
+      });
+
+      const metadata = highestNft.raw?.metadata;
       const attributes = metadata?.attributes || [];
       const rarity = getRarityFromTraits(attributes);
       
-      return {
-        id: `${nft.contract.address}-${nft.tokenId}`,
-        name: nft.title || metadata?.name || `Actrule #${nft.tokenId}`,
-        collection: nft.contract.name || 'Actrule Collection',
+      avatars.push({
+        id: `${highestNft.contract.address}-${highestNft.tokenId}`,
+        name: highestNft.title || metadata?.name || `Actrule #${highestNft.tokenId}`,
+        collection: highestNft.contract.name || 'Actrule Collection',
         rarity,
-        image: nft.image?.cachedUrl || nft.image?.thumbnailUrl || metadata?.image || '🍄',
+        image: highestNft.image?.cachedUrl || highestNft.image?.thumbnailUrl || metadata?.image || '🍄',
         traits: attributes.map(attr => `${attr.trait_type}: ${attr.value}`),
         lootBoxesAvailable: getLootBoxCount(rarity),
-        contractAddress: nft.contract.address,
-        tokenId: nft.tokenId
-      };
+        contractAddress: highestNft.contract.address,
+        tokenId: highestNft.tokenId,
+        totalOwned: nfts.length
+      });
     });
 
-    console.log('Processed avatars:', avatars);
+    console.log('Processed avatars (highest numbered only):', avatars);
     return avatars;
   } catch (error) {
     console.error('Error fetching Actrule NFTs:', error);

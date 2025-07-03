@@ -19,6 +19,7 @@ interface Avatar {
   lootBoxesAvailable: number;
   contractAddress?: string;
   tokenId?: string;
+  totalOwned?: number;
 }
 
 interface AvatarGridProps {
@@ -28,57 +29,33 @@ interface AvatarGridProps {
 const mockAvatars: Avatar[] = [
   {
     id: '1',
-    name: 'Mystic Mushroom',
+    name: 'Mystic Mushroom #15',
     collection: 'Genesis',
     rarity: 'Legendary',
     image: '🍄‍🟫',
     traits: ['Glowing Cap', 'Ancient Spores'],
-    lootBoxesAvailable: 3
+    lootBoxesAvailable: 3,
+    totalOwned: 3
   },
   {
     id: '2',
-    name: 'Forest Sage',
+    name: 'Forest Sage #22',
     collection: 'Mystics',
     rarity: 'Rare',
     image: '🧙‍♂️',
     traits: ['Nature Magic', 'Woodland Wisdom'],
-    lootBoxesAvailable: 2
+    lootBoxesAvailable: 2,
+    totalOwned: 2
   },
   {
     id: '3',
-    name: 'Spore Keeper',
+    name: 'Spore Keeper #8',
     collection: 'Commons',
     rarity: 'Common',
     image: '🌱',
     traits: ['Growth Power', 'Life Energy'],
-    lootBoxesAvailable: 1
-  },
-  {
-    id: '4',
-    name: 'Crystal Mushroom',
-    collection: 'Elementals',
-    rarity: 'Rare',
-    image: '💎',
-    traits: ['Crystalline Structure', 'Light Refraction'],
-    lootBoxesAvailable: 2
-  },
-  {
-    id: '5',
-    name: 'Shadow Spore',
-    collection: 'Dark',
-    rarity: 'Legendary',
-    image: '🖤',
-    traits: ['Shadow Form', 'Dark Energy'],
-    lootBoxesAvailable: 3
-  },
-  {
-    id: '6',
-    name: 'Golden Truffle',
-    collection: 'Rare',
-    rarity: 'Rare',
-    image: '🏆',
-    traits: ['Golden Sheen', 'Rare Find'],
-    lootBoxesAvailable: 2
+    lootBoxesAvailable: 1,
+    totalOwned: 1
   }
 ];
 
@@ -226,6 +203,12 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
                   </motion.div>
                   
                   <h3 className="text-xl font-bold text-white mb-2">{avatar.name}</h3>
+                  
+                  {avatar.totalOwned && avatar.totalOwned > 1 && (
+                    <p className="text-green-300 text-sm mb-2">
+                      Highest of {avatar.totalOwned} owned
+                    </p>
+                  )}
                   
                   <div className="flex justify-center mb-3">
                     <Badge className={`${rarityColors[avatar.rarity]} text-white`}>
