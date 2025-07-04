@@ -33,6 +33,48 @@ export type Database = {
         }
         Relationships: []
       }
+      rarity_rewards: {
+        Row: {
+          base_xp_max: number
+          base_xp_min: number
+          created_at: string
+          id: string
+          level_up_hroom: number
+          level_up_spore: number
+          rarity: string
+          token_amount_max: number
+          token_amount_min: number
+          token_drop_chance: number
+          updated_at: string
+        }
+        Insert: {
+          base_xp_max?: number
+          base_xp_min?: number
+          created_at?: string
+          id?: string
+          level_up_hroom?: number
+          level_up_spore?: number
+          rarity: string
+          token_amount_max?: number
+          token_amount_min?: number
+          token_drop_chance?: number
+          updated_at?: string
+        }
+        Update: {
+          base_xp_max?: number
+          base_xp_min?: number
+          created_at?: string
+          id?: string
+          level_up_hroom?: number
+          level_up_spore?: number
+          rarity?: string
+          token_amount_max?: number
+          token_amount_min?: number
+          token_drop_chance?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reward_config: {
         Row: {
           base_xp_max: number

@@ -6,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useChestCooldown } from '@/hooks/useChestCooldown';
 import { useRewardConfig } from '@/hooks/useRewardConfig';
+import { useRarityRewards } from '@/hooks/useRarityRewards';
 import { LootBoxHeader } from './loot-box/LootBoxHeader';
 import { UnOpenedState } from './loot-box/UnOpenedState';
 import { OpeningState } from './loot-box/OpeningState';
@@ -41,6 +42,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
   const { addXP } = useUserProfile();
   const { updateCooldown, getCooldownStatus } = useChestCooldown();
   const { config } = useRewardConfig();
+  const { rewards } = useRarityRewards();
 
   const resetState = () => {
     setIsOpening(false);
@@ -69,18 +71,29 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     // Simulate chest opening delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Calculate XP based on rarity and config
-    const baseXP = Math.floor(Math.random() * (config.baseXpMax - config.baseXpMin + 1)) + config.baseXpMin;
+    // Get rarity-specific config or fallback to default
+    const rarityConfig = rewards[avatar.rarity] || {
+      baseXpMin: config.baseXpMin,
+      baseXpMax: config.baseXpMax,
+      tokenDropChance: config.tokenDropChance,
+      tokenAmountMin: config.tokenAmountMin,
+      tokenAmountMax: config.tokenAmountMax,
+      levelUpHroom: config.levelUpHroom,
+      levelUpSpore: config.levelUpSpore,
+    };
+    
+    // Calculate XP based on rarity-specific config
+    const baseXP = Math.floor(Math.random() * (rarityConfig.baseXpMax - rarityConfig.baseXpMin + 1)) + rarityConfig.baseXpMin;
     const multiplier = XP_MULTIPLIERS[avatar.rarity];
     const finalXP = baseXP * multiplier;
     setXpGained(finalXP);
     
-    // Check for token drop (very small chance)
-    const tokenDrop = Math.random() < config.tokenDropChance;
+    // Check for token drop using rarity-specific chance
+    const tokenDrop = Math.random() < rarityConfig.tokenDropChance;
     let tokenReward: Reward | null = null;
     
     if (tokenDrop) {
-      const tokenAmount = Math.floor(Math.random() * (config.tokenAmountMax - config.tokenAmountMin + 1)) + config.tokenAmountMin;
+      const tokenAmount = Math.floor(Math.random() * (rarityConfig.tokenAmountMax - rarityConfig.tokenAmountMin + 1)) + rarityConfig.tokenAmountMin;
       const isHroom = Math.random() < 0.5;
       tokenReward = {
         type: 'token',
@@ -118,7 +131,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     }
     
     if (levelResult.leveledUp) {
-      description += ` Level ${levelResult.newLevel} reached! +${config.levelUpHroom} HROOM & +${config.levelUpSpore} SPORE!`;
+      description += ` Level ${levelResult.newLevel} reached! +${rarityConfig.levelUpHroom} HROOM & +${rarityConfig.levelUpSpore} SPORE!`;
       toast({
         title: "Level Up! 🎉",
         description,

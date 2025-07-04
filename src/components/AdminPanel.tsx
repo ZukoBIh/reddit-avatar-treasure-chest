@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from '@/hooks/use-toast';
 import AdminRewardPanel from './AdminRewardPanel';
+import RarityRewardsPanel from './RarityRewardsPanel';
 
 interface Avatar {
   id: string;
@@ -57,6 +58,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange }) => {
       className="mb-6 space-y-4"
     >
       <AdminRewardPanel />
+      <RarityRewardsPanel />
       
       <Card className="p-6 bg-red-900/20 backdrop-blur-sm border-red-500/30">
         <div className="flex items-center justify-between mb-4">
