@@ -97,7 +97,7 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
     const { canOpen, remainingTime } = getCooldownStatus(avatar.id, avatar.rarity);
     
     if (!canOpen) {
-      return; // Don't open if on cooldown
+      return; // Don't open if on cooldown - button will be disabled
     }
     
     onAvatarSelect(avatar);
@@ -165,8 +165,8 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={canOpen ? { scale: 1.05, rotateY: 5 } : {}}
               whileTap={canOpen ? { scale: 0.95 } : {}}
-              onClick={() => handleAvatarClick(avatar)}
-              className={`cursor-pointer ${!canOpen ? 'opacity-50' : ''}`}
+              onClick={canOpen ? () => handleAvatarClick(avatar) : undefined}
+              className={`${canOpen ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
             >
               <Card className={`p-6 bg-black/30 backdrop-blur-sm border-green-500/30 hover:border-green-400/60 transition-all duration-300 ${!canOpen ? 'border-red-500/30' : ''}`}>
                 <div className="text-center">
@@ -204,11 +204,11 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
                   
                   <h3 className="text-xl font-bold text-white mb-2">{avatar.name}</h3>
                   
-                  {avatar.totalOwned && avatar.totalOwned > 1 && (
-                    <p className="text-green-300 text-sm mb-2">
-                      Highest of {avatar.totalOwned} owned
-                    </p>
-                  )}
+                   {avatar.totalOwned && avatar.totalOwned > 1 && (
+                     <p className="text-green-300 text-sm mb-2">
+                       Lowest of {avatar.totalOwned} owned
+                     </p>
+                   )}
                   
                   <div className="flex justify-center mb-3">
                     <Badge className={`${rarityColors[avatar.rarity]} text-white`}>

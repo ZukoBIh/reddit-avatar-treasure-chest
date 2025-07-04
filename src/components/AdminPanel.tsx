@@ -28,17 +28,27 @@ interface AdminPanelProps {
 const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange }) => {
   const { profile } = useUserProfile();
   const [selectedRarities, setSelectedRarities] = useState<Record<string, 'Common' | 'Rare' | 'Legendary'>>({});
+  const [pendingChanges, setPendingChanges] = useState<Record<string, 'Common' | 'Rare' | 'Legendary'>>({});
 
   if (!profile?.isAdmin) return null;
 
-  const handleRarityChange = (avatarId: string, newRarity: 'Common' | 'Rare' | 'Legendary') => {
+  const handleRaritySelect = (avatarId: string, newRarity: 'Common' | 'Rare' | 'Legendary') => {
     setSelectedRarities(prev => ({ ...prev, [avatarId]: newRarity }));
-    onRarityChange(avatarId, newRarity);
+    setPendingChanges(prev => ({ ...prev, [avatarId]: newRarity }));
+  };
+
+  const saveChanges = () => {
+    Object.entries(pendingChanges).forEach(([avatarId, newRarity]) => {
+      onRarityChange(avatarId, newRarity);
+    });
+    setPendingChanges({});
     toast({
-      title: "Rarity Updated",
-      description: `NFT rarity changed to ${newRarity}`,
+      title: "Changes Saved",
+      description: `${Object.keys(pendingChanges).length} rarity changes applied`,
     });
   };
+
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
   return (
     <motion.div
@@ -49,10 +59,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange }) => {
       <AdminRewardPanel />
       
       <Card className="p-6 bg-red-900/20 backdrop-blur-sm border-red-500/30">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-2xl">⚙️</span>
-          <h2 className="text-xl font-bold text-white">NFT Rarity Control</h2>
-          <Badge className="bg-red-500 text-white">Admin Only</Badge>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">⚙️</span>
+            <h2 className="text-xl font-bold text-white">NFT Rarity Control</h2>
+            <Badge className="bg-red-500 text-white">Admin Only</Badge>
+          </div>
+          {hasPendingChanges && (
+            <Button onClick={saveChanges} className="bg-green-600 hover:bg-green-700">
+              Save Changes ({Object.keys(pendingChanges).length})
+            </Button>
+          )}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -76,7 +93,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange }) => {
               <Select
                 value={selectedRarities[avatar.id] || avatar.rarity}
                 onValueChange={(value: 'Common' | 'Rare' | 'Legendary') => 
-                  handleRarityChange(avatar.id, value)
+                  handleRaritySelect(avatar.id, value)
                 }
               >
                 <SelectTrigger className="w-32 h-8 text-xs">

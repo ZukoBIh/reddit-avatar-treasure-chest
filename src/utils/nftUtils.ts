@@ -123,33 +123,33 @@ export const fetchActruleNFTs = async (walletAddress: string): Promise<Avatar[]>
 
     const avatars: Avatar[] = [];
 
-    // For each contract, find the highest numbered NFT
+    // For each contract, find the lowest numbered NFT
     nftsByContract.forEach((nfts, contractAddress) => {
-      const highestNft = nfts.reduce((highest, current) => {
+      const lowestNft = nfts.reduce((lowest, current) => {
         const currentNum = extractTokenNumber(current.tokenId);
-        const highestNum = extractTokenNumber(highest.tokenId);
-        return currentNum > highestNum ? current : highest;
+        const lowestNum = extractTokenNumber(lowest.tokenId);
+        return currentNum < lowestNum ? current : lowest;
       });
 
-      const metadata = highestNft.raw?.metadata;
+      const metadata = lowestNft.raw?.metadata;
       const attributes = metadata?.attributes || [];
       const rarity = getRarityFromTraits(attributes);
       
       avatars.push({
-        id: `${highestNft.contract.address}-${highestNft.tokenId}`,
-        name: highestNft.title || metadata?.name || `Actrule #${highestNft.tokenId}`,
-        collection: highestNft.contract.name || 'Actrule Collection',
+        id: `${lowestNft.contract.address}-${lowestNft.tokenId}`,
+        name: lowestNft.title || metadata?.name || `Actrule #${lowestNft.tokenId}`,
+        collection: lowestNft.contract.name || 'Actrule Collection',
         rarity,
-        image: highestNft.image?.cachedUrl || highestNft.image?.thumbnailUrl || metadata?.image || '🍄',
+        image: lowestNft.image?.cachedUrl || lowestNft.image?.thumbnailUrl || metadata?.image || '🍄',
         traits: attributes.map(attr => `${attr.trait_type}: ${attr.value}`),
         lootBoxesAvailable: getLootBoxCount(rarity),
-        contractAddress: highestNft.contract.address,
-        tokenId: highestNft.tokenId,
+        contractAddress: lowestNft.contract.address,
+        tokenId: lowestNft.tokenId,
         totalOwned: nfts.length
       });
     });
 
-    console.log('Processed avatars (highest numbered only):', avatars);
+    console.log('Processed avatars (lowest numbered only):', avatars);
     return avatars;
   } catch (error) {
     console.error('Error fetching Actrule NFTs:', error);

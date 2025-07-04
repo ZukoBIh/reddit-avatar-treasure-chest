@@ -79,7 +79,7 @@ const WalletConnection: React.FC<WalletConnectionProps> = ({ onConnect }) => {
                   }
 
                   return (
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 flex-wrap">
                       <button
                         onClick={openChainModal}
                         className="bg-green-600/20 border border-green-400 text-green-300 px-4 py-2 rounded-lg"
@@ -118,6 +118,17 @@ const WalletConnection: React.FC<WalletConnectionProps> = ({ onConnect }) => {
                         {account.displayBalance
                           ? ` (${account.displayBalance})`
                           : ''}
+                      </button>
+                      
+                      <button
+                        onClick={() => {
+                          // Using window.location.reload to disconnect
+                          window.location.reload();
+                        }}
+                        type="button"
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                      >
+                        Disconnect
                       </button>
                     </div>
                   );
