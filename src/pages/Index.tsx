@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useAccount } from 'wagmi';
 import WalletConnection from '../components/WalletConnection';
 import AvatarGrid from '../components/AvatarGrid';
 import LootBoxModal from '../components/LootBoxModal';
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 const Index = () => {
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const { isConnected } = useAccount();
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [isLootBoxOpen, setIsLootBoxOpen] = useState(false);
 
@@ -78,7 +79,7 @@ const Index = () => {
 
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
-          {!isWalletConnected ? (
+          {!isConnected ? (
             <motion.div
               className="max-w-md mx-auto"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -103,7 +104,7 @@ const Index = () => {
                   <p className="text-green-200 mb-6">
                     Connect your wallet to discover which NFTs you own and unlock their magical forage chests!
                   </p>
-                  <WalletConnection onConnect={() => setIsWalletConnected(true)} />
+                  <WalletConnection onConnect={() => {}} />
                 </div>
               </Card>
             </motion.div>
