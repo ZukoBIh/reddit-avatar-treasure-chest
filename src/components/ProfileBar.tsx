@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useDisconnect } from 'wagmi';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -9,6 +10,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 
 const ProfileBar: React.FC = () => {
   const { profile, getXPForCurrentLevel, getShortAddress, isLoading } = useUserProfile();
+  const { disconnect } = useDisconnect();
 
   if (isLoading) {
     return (
@@ -83,7 +85,7 @@ const ProfileBar: React.FC = () => {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => window.location.reload()}
+                onClick={() => disconnect()}
                 className="shrink-0"
               >
                 Disconnect
