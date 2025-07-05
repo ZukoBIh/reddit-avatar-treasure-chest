@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 const ProfileBar: React.FC = () => {
@@ -67,15 +68,26 @@ const ProfileBar: React.FC = () => {
               </Badge>
             </div>
 
-            <div className="min-w-[200px]">
-              <div className="flex justify-between text-xs text-green-200 mb-1">
-                <span>XP: {current}/{needed}</span>
-                <span>{Math.round(progressPercentage)}%</span>
+            <div className="flex items-center gap-4">
+              <div className="min-w-[200px]">
+                <div className="flex justify-between text-xs text-green-200 mb-1">
+                  <span>XP: {current}/{needed}</span>
+                  <span>{Math.round(progressPercentage)}%</span>
+                </div>
+                <Progress 
+                  value={progressPercentage} 
+                  className="h-2 bg-green-900/50"
+                />
               </div>
-              <Progress 
-                value={progressPercentage} 
-                className="h-2 bg-green-900/50"
-              />
+              
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => window.location.reload()}
+                className="shrink-0"
+              >
+                Disconnect
+              </Button>
             </div>
           </div>
         </div>
