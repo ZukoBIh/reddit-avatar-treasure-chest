@@ -7,6 +7,7 @@ import { useAccount } from 'wagmi';
 import { useQuery } from '@tanstack/react-query';
 import { fetchActruleNFTs } from '@/utils/nftUtils';
 import { useChestCooldown } from '@/hooks/useChestCooldown';
+import { useNftRarities } from '@/hooks/useNftRarities';
 import AdminPanel from './AdminPanel';
 
 interface Avatar {
@@ -34,7 +35,7 @@ const mockAvatars: Avatar[] = [
     rarity: 'Legendary',
     image: '🍄‍🟫',
     traits: ['Glowing Cap', 'Ancient Spores'],
-    lootBoxesAvailable: 3,
+    lootBoxesAvailable: 1,
     totalOwned: 3
   },
   {
@@ -44,7 +45,7 @@ const mockAvatars: Avatar[] = [
     rarity: 'Rare',
     image: '🧙‍♂️',
     traits: ['Nature Magic', 'Woodland Wisdom'],
-    lootBoxesAvailable: 2,
+    lootBoxesAvailable: 1,
     totalOwned: 2
   },
   {
@@ -68,7 +69,8 @@ const rarityColors = {
 const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
   const { address, isConnected } = useAccount();
   const { getCooldownStatus } = useChestCooldown();
-  const [avatarRarities, setAvatarRarities] = useState<Record<string, 'Common' | 'Rare' | 'Legendary'>>({});
+  const { rarities: avatarRarities, saveAllRarities } = useNftRarities();
+  const [pendingRarities, setPendingRarities] = useState<Record<string, 'Common' | 'Rare' | 'Legendary'>>({});
 
   const { data: nfts, isLoading, error } = useQuery({
     queryKey: ['actrule-nfts', address],
@@ -83,14 +85,21 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
   // Apply admin rarity overrides
   const avatarsToShow = baseAvatars.map(avatar => ({
     ...avatar,
-    rarity: avatarRarities[avatar.id] || avatar.rarity,
-    lootBoxesAvailable: avatarRarities[avatar.id] 
-      ? (avatarRarities[avatar.id] === 'Legendary' ? 3 : avatarRarities[avatar.id] === 'Rare' ? 2 : 1)
-      : avatar.lootBoxesAvailable
+    rarity: pendingRarities[avatar.id] || avatarRarities[avatar.id] || avatar.rarity,
+    lootBoxesAvailable: 1 // Always 1 chest per NFT regardless of rarity
   }));
 
   const handleRarityChange = (avatarId: string, newRarity: 'Common' | 'Rare' | 'Legendary') => {
-    setAvatarRarities(prev => ({ ...prev, [avatarId]: newRarity }));
+    setPendingRarities(prev => ({ ...prev, [avatarId]: newRarity }));
+  };
+
+  const handleSaveRarities = async (pendingChanges: Record<string, 'Common' | 'Rare' | 'Legendary'>) => {
+    try {
+      await saveAllRarities({ ...avatarRarities, ...pendingChanges });
+      setPendingRarities({});
+    } catch (error) {
+      throw error;
+    }
   };
 
   const handleAvatarClick = (avatar: Avatar) => {
@@ -151,7 +160,12 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <AdminPanel avatars={avatarsToShow} onRarityChange={handleRarityChange} />
+      <AdminPanel 
+        avatars={avatarsToShow} 
+        onRarityChange={handleRarityChange}
+        onSaveRarities={handleSaveRarities}
+        pendingRarities={pendingRarities}
+      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {avatarsToShow.map((avatar, index) => {

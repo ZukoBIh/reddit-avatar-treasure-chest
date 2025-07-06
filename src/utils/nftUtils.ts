@@ -69,12 +69,7 @@ const getRarityFromTraits = (attributes: Array<{ trait_type: string; value: stri
 };
 
 const getLootBoxCount = (rarity: 'Common' | 'Rare' | 'Legendary'): number => {
-  switch (rarity) {
-    case 'Legendary': return 3;
-    case 'Rare': return 2;
-    case 'Common': return 1;
-    default: return 1;
-  }
+  return 1; // Always 1 chest per NFT regardless of rarity
 };
 
 const extractTokenNumber = (tokenId: string): number => {

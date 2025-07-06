@@ -33,6 +33,33 @@ export type Database = {
         }
         Relationships: []
       }
+      nft_rarities: {
+        Row: {
+          created_at: string
+          id: string
+          nft_id: string
+          rarity: string
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nft_id: string
+          rarity: string
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nft_id?: string
+          rarity?: string
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       rarity_rewards: {
         Row: {
           base_xp_max: number

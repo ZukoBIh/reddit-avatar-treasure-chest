@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useDisconnect } from 'wagmi';
 import { Card } from '@/components/ui/card';
@@ -9,7 +9,21 @@ import { Button } from '@/components/ui/button';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 const ProfileBar: React.FC = () => {
-  const { profile, getXPForCurrentLevel, getShortAddress, isLoading } = useUserProfile();
+  const { profile, isLoading, addXP, getXPForCurrentLevel, getShortAddress } = useUserProfile();
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Function to trigger refresh
+  const refreshProfile = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
+  // Expose refresh function globally for LootBoxModal to use
+  React.useEffect(() => {
+    (window as any).refreshProfile = refreshProfile;
+    return () => {
+      delete (window as any).refreshProfile;
+    };
+  }, []);
   const { disconnect } = useDisconnect();
 
   if (isLoading) {

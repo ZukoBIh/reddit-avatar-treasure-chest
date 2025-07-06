@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from '@/hooks/use-toast';
-import AdminRewardPanel from './AdminRewardPanel';
 import RarityRewardsPanel from './RarityRewardsPanel';
 
 interface Avatar {
@@ -24,32 +23,38 @@ interface Avatar {
 interface AdminPanelProps {
   avatars: Avatar[];
   onRarityChange: (avatarId: string, newRarity: 'Common' | 'Rare' | 'Legendary') => void;
+  onSaveRarities: (pendingChanges: Record<string, 'Common' | 'Rare' | 'Legendary'>) => Promise<void>;
+  pendingRarities: Record<string, 'Common' | 'Rare' | 'Legendary'>;
 }
 
-const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange }) => {
+const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange, onSaveRarities, pendingRarities }) => {
   const { profile } = useUserProfile();
   const [selectedRarities, setSelectedRarities] = useState<Record<string, 'Common' | 'Rare' | 'Legendary'>>({});
-  const [pendingChanges, setPendingChanges] = useState<Record<string, 'Common' | 'Rare' | 'Legendary'>>({});
 
   if (!profile?.isAdmin) return null;
 
   const handleRaritySelect = (avatarId: string, newRarity: 'Common' | 'Rare' | 'Legendary') => {
     setSelectedRarities(prev => ({ ...prev, [avatarId]: newRarity }));
-    setPendingChanges(prev => ({ ...prev, [avatarId]: newRarity }));
+    onRarityChange(avatarId, newRarity);
   };
 
-  const saveChanges = () => {
-    Object.entries(pendingChanges).forEach(([avatarId, newRarity]) => {
-      onRarityChange(avatarId, newRarity);
-    });
-    setPendingChanges({});
-    toast({
-      title: "Changes Saved",
-      description: `${Object.keys(pendingChanges).length} rarity changes applied`,
-    });
+  const saveChanges = async () => {
+    try {
+      await onSaveRarities(pendingRarities);
+      toast({
+        title: "Changes Saved",
+        description: `${Object.keys(pendingRarities).length} rarity changes applied`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save rarity changes",
+        variant: "destructive",
+      });
+    }
   };
 
-  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
+  const hasPendingChanges = Object.keys(pendingRarities).length > 0;
 
   return (
     <motion.div
@@ -57,7 +62,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange }) => {
       animate={{ opacity: 1, y: 0 }}
       className="mb-6 space-y-4"
     >
-      <AdminRewardPanel />
       <RarityRewardsPanel />
       
       <Card className="p-6 bg-red-900/20 backdrop-blur-sm border-red-500/30">
@@ -69,7 +73,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange }) => {
           </div>
           {hasPendingChanges && (
             <Button onClick={saveChanges} className="bg-green-600 hover:bg-green-700">
-              Save Changes ({Object.keys(pendingChanges).length})
+              Save Changes ({Object.keys(pendingRarities).length})
             </Button>
           )}
         </div>

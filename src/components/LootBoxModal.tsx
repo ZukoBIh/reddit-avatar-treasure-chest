@@ -111,6 +111,11 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     // Update cooldown
     await updateCooldown(avatar.id);
     
+    // Refresh profile bar
+    if ((window as any).refreshProfile) {
+      (window as any).refreshProfile();
+    }
+    
     // Set reward (XP always, token sometimes)
     const mainReward: Reward = {
       type: 'xp',
