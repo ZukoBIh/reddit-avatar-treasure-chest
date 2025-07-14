@@ -38,6 +38,72 @@ export type Database = {
         }
         Relationships: []
       }
+      level_rewards_pool: {
+        Row: {
+          created_at: string
+          hroom_amount: number
+          id: string
+          is_active: boolean
+          max_level: number
+          min_level: number
+          reward_type: string
+          spore_amount: number
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          hroom_amount?: number
+          id?: string
+          is_active?: boolean
+          max_level?: number
+          min_level?: number
+          reward_type: string
+          spore_amount?: number
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          hroom_amount?: number
+          id?: string
+          is_active?: boolean
+          max_level?: number
+          min_level?: number
+          reward_type?: string
+          spore_amount?: number
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      leveling_config: {
+        Row: {
+          base_xp_requirement: number
+          created_at: string
+          id: string
+          max_level: number
+          updated_at: string
+          xp_scaling_factor: number
+        }
+        Insert: {
+          base_xp_requirement?: number
+          created_at?: string
+          id?: string
+          max_level?: number
+          updated_at?: string
+          xp_scaling_factor?: number
+        }
+        Update: {
+          base_xp_requirement?: number
+          created_at?: string
+          id?: string
+          max_level?: number
+          updated_at?: string
+          xp_scaling_factor?: number
+        }
+        Relationships: []
+      }
       nft_rarities: {
         Row: {
           created_at: string

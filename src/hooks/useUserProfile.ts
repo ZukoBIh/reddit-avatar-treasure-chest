@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { supabase } from '@/integrations/supabase/client';
+import { useLevelingSystem } from './useLevelingSystem';
+import { useLevelUpRewards } from './useLevelUpRewards';
 
 interface UserProfile {
   id: string;
@@ -13,12 +15,14 @@ interface UserProfile {
   isAdmin: boolean;
 }
 
-const XP_PER_LEVEL = 100;
+
 
 export const useUserProfile = () => {
   const { address } = useAccount();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { getLevelFromXp, getXpProgress } = useLevelingSystem();
+  const { getLevelUpRewards } = useLevelUpRewards();
 
   const createProfile = async (walletAddress: string): Promise<UserProfile> => {
     const newProfile = {
@@ -68,21 +72,15 @@ export const useUserProfile = () => {
   const addXP = async (xpGained: number) => {
     if (!profile) return { leveledUp: false, newLevel: 1 };
 
-    // Get reward config for level-up rewards
-    const { data: rewardConfig } = await supabase
-      .from('reward_config')
-      .select('level_up_hroom, level_up_spore')
-      .eq('config_type', 'default')
-      .single();
-
     const newXP = profile.currentXP + xpGained;
-    const newLevel = Math.floor(newXP / XP_PER_LEVEL) + 1;
+    const newLevel = getLevelFromXp(newXP);
     const leveledUp = newLevel > profile.level;
     
-    // Calculate level-up rewards
+    // Calculate level-up rewards using pooled system
     const levelsGained = leveledUp ? newLevel - profile.level : 0;
-    const hroomReward = levelsGained * (rewardConfig?.level_up_hroom || 100);
-    const sporeReward = levelsGained * (rewardConfig?.level_up_spore || 25);
+    const { hroom: hroomReward, spores: sporeReward } = levelsGained > 0 
+      ? getLevelUpRewards(newLevel, levelsGained) 
+      : { hroom: 0, spores: 0 };
     
     const updatedProfile = {
       ...profile,
@@ -99,8 +97,8 @@ export const useUserProfile = () => {
 
   const getXPForCurrentLevel = () => {
     if (!profile) return { current: 0, needed: 100 };
-    const currentLevelXP = profile.currentXP % XP_PER_LEVEL;
-    return { current: currentLevelXP, needed: XP_PER_LEVEL };
+    const progress = getXpProgress(profile.currentXP);
+    return { current: progress.current, needed: progress.needed };
   };
 
   const getShortAddress = (addr: string) => {

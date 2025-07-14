@@ -62,7 +62,7 @@ export const RewardDisplay: React.FC<RewardDisplayProps> = ({
               Level {levelUpInfo.newLevel}!
             </p>
             <p className="text-sm text-orange-300 mt-2">
-              +{config?.levelUpHroom || 100} $HROOM & +{config?.levelUpSpore || 25} $SPORE
+              Random reward from level-up pool!
             </p>
           </div>
         )}
