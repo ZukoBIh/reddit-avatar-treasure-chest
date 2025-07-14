@@ -5,6 +5,8 @@ import WalletConnection from '../components/WalletConnection';
 import AvatarGrid from '../components/AvatarGrid';
 import LootBoxModal from '../components/LootBoxModal';
 import ProfileBar from '../components/ProfileBar';
+import { AchievementsPanel } from '../components/AchievementsPanel';
+import { CollectionProgress } from '../components/CollectionProgress';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -12,6 +14,7 @@ const Index = () => {
   const { isConnected } = useAccount();
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [isLootBoxOpen, setIsLootBoxOpen] = useState(false);
+  const [ownedContracts, setOwnedContracts] = useState<string[]>([]);
 
   const handleAvatarSelect = (avatar: any) => {
     setSelectedAvatar(avatar);
@@ -115,15 +118,26 @@ const Index = () => {
               transition={{ duration: 0.8 }}
             >
               <ProfileBar />
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-white mb-4">
-                  Your NFT Collection
-                </h2>
-                <p className="text-green-200">
-                  Click on any NFT to open its forage chest and earn XP!
-                </p>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="text-center">
+                    <h2 className="text-3xl font-bold text-white mb-4">
+                      Your NFT Collection
+                    </h2>
+                    <p className="text-green-200">
+                      Click on any NFT to open its forage chest and earn XP!
+                    </p>
+                  </div>
+                  <AvatarGrid 
+                    onAvatarSelect={handleAvatarSelect} 
+                    onContractsLoaded={setOwnedContracts}
+                  />
+                </div>
+                <div className="space-y-6">
+                  <CollectionProgress ownedContracts={ownedContracts} />
+                  <AchievementsPanel />
+                </div>
               </div>
-              <AvatarGrid onAvatarSelect={handleAvatarSelect} />
             </motion.div>
           )}
         </div>

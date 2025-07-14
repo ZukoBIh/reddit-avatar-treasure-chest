@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          achievement_key: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          requirement_type: string
+          requirement_value: number
+          reward_hroom: number
+          reward_spores: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          achievement_key: string
+          created_at?: string
+          description: string
+          icon: string
+          id?: string
+          is_active?: boolean
+          requirement_type: string
+          requirement_value?: number
+          reward_hroom?: number
+          reward_spores?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          achievement_key?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          requirement_type?: string
+          requirement_value?: number
+          reward_hroom?: number
+          reward_spores?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chest_cooldowns: {
         Row: {
           created_at: string
@@ -34,6 +79,33 @@ export type Database = {
           id?: string
           last_opened_at?: string
           nft_id?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      collection_completions: {
+        Row: {
+          completion_bonus_claimed: boolean
+          created_at: string
+          first_completion_at: string | null
+          id: string
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          completion_bonus_claimed?: boolean
+          created_at?: string
+          first_completion_at?: string | null
+          id?: string
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          completion_bonus_claimed?: boolean
+          created_at?: string
+          first_completion_at?: string | null
+          id?: string
+          updated_at?: string
           wallet_address?: string
         }
         Relationships: []
@@ -212,6 +284,39 @@ export type Database = {
           token_amount_min?: number
           token_drop_chance?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_key: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          is_completed: boolean
+          progress: number
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          achievement_key: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          progress?: number
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          achievement_key?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          progress?: number
+          updated_at?: string
+          wallet_address?: string
         }
         Relationships: []
       }

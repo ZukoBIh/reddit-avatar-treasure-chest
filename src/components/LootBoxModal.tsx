@@ -7,6 +7,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { useChestCooldown } from '@/hooks/useChestCooldown';
 import { useRewardConfig } from '@/hooks/useRewardConfig';
 import { useRarityRewards } from '@/hooks/useRarityRewards';
+import { useAchievements } from '@/hooks/useAchievements';
 import { LootBoxHeader } from './loot-box/LootBoxHeader';
 import { UnOpenedState } from './loot-box/UnOpenedState';
 import { OpeningState } from './loot-box/OpeningState';
@@ -43,6 +44,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
   const { updateCooldown, getCooldownStatus } = useChestCooldown();
   const { config } = useRewardConfig();
   const { rewards } = useRarityRewards();
+  const { updateChestOpenProgress } = useAchievements();
 
   const resetState = () => {
     setIsOpening(false);
@@ -110,6 +112,9 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
     
     // Update cooldown
     await updateCooldown(avatar.id);
+    
+    // Update achievement progress for chest opening
+    await updateChestOpenProgress();
     
     // Refresh profile bar
     if ((window as any).refreshProfile) {

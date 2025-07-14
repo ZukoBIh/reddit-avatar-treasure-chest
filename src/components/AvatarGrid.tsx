@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchActruleNFTs } from '@/utils/nftUtils';
 import { useChestCooldown } from '@/hooks/useChestCooldown';
 import { useNftRarities } from '@/hooks/useNftRarities';
+import { useAchievements } from '@/hooks/useAchievements';
 import AdminPanel from './AdminPanel';
 
 interface Avatar {
@@ -25,6 +26,7 @@ interface Avatar {
 
 interface AvatarGridProps {
   onAvatarSelect: (avatar: Avatar) => void;
+  onContractsLoaded?: (contracts: string[]) => void;
 }
 
 const mockAvatars: Avatar[] = [
@@ -66,10 +68,11 @@ const rarityColors = {
   Legendary: 'bg-yellow-500'
 };
 
-const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
+const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect, onContractsLoaded }) => {
   const { address, isConnected } = useAccount();
   const { getCooldownStatus } = useChestCooldown();
   const { rarities: avatarRarities, saveAllRarities } = useNftRarities();
+  const { checkCollectionCompletion } = useAchievements();
   const [pendingRarities, setPendingRarities] = useState<Record<string, 'Common' | 'Rare' | 'Legendary'>>({});
 
   const { data: nfts, isLoading, error } = useQuery({
@@ -78,6 +81,18 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ onAvatarSelect }) => {
     enabled: !!address && isConnected,
     refetchOnWindowFocus: false,
   });
+
+  // Handle NFT data changes for collection tracking
+  useEffect(() => {
+    if (nfts && nfts.length > 0) {
+      // Extract contract addresses and notify parent
+      const contracts = nfts.map(nft => nft.contractAddress).filter(Boolean);
+      onContractsLoaded?.(contracts);
+      
+      // Check collection completion for achievements
+      checkCollectionCompletion(contracts);
+    }
+  }, [nfts, onContractsLoaded, checkCollectionCompletion]);
 
   // Use real NFTs if available, otherwise fall back to mock data
   const baseAvatars = nfts && nfts.length > 0 ? nfts : mockAvatars;
