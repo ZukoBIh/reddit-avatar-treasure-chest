@@ -61,13 +61,20 @@ export const useAchievements = () => {
   };
 
   const updateChestOpenProgress = async () => {
-    if (!address) return;
+    if (!address) {
+      console.log('No wallet address, skipping achievement progress');
+      return;
+    }
 
+    console.log('Starting achievement progress update...');
     try {
       // Get or create chest opening achievements progress
       const chestAchievements = achievements.filter(a => a.requirement_type === 'chest_opens');
+      console.log('Found chest achievements:', chestAchievements.length);
       
       for (const achievement of chestAchievements) {
+        console.log(`Processing achievement: ${achievement.achievement_key}`);
+        
         const { data: existing, error: fetchError } = await supabase
           .from('user_achievements')
           .select('*')
@@ -75,11 +82,18 @@ export const useAchievements = () => {
           .eq('achievement_key', achievement.achievement_key)
           .maybeSingle();
 
-        if (fetchError) throw fetchError;
+        if (fetchError) {
+          console.error('Error fetching existing achievement:', fetchError);
+          throw fetchError;
+        }
+
+        console.log('Existing achievement data:', existing);
 
         if (existing && !existing.is_completed) {
           const newProgress = existing.progress + 1;
           const isCompleted = newProgress >= achievement.requirement_value;
+          
+          console.log(`Updating progress from ${existing.progress} to ${newProgress}, completed: ${isCompleted}`);
 
           const { error: updateError } = await supabase
             .from('user_achievements')
@@ -90,9 +104,13 @@ export const useAchievements = () => {
             })
             .eq('id', existing.id);
 
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error('Error updating achievement:', updateError);
+            throw updateError;
+          }
 
           if (isCompleted) {
+            console.log('Achievement completed, awarding rewards...');
             // Award achievement rewards
             await awardAchievementReward(achievement);
             toast({
@@ -102,6 +120,8 @@ export const useAchievements = () => {
           }
         } else if (!existing) {
           const isCompleted = 1 >= achievement.requirement_value;
+          
+          console.log(`Creating new achievement progress, completed: ${isCompleted}`);
 
           const { error: insertError } = await supabase
             .from('user_achievements')
@@ -113,21 +133,30 @@ export const useAchievements = () => {
               completed_at: isCompleted ? new Date().toISOString() : null
             });
 
-          if (insertError) throw insertError;
+          if (insertError) {
+            console.error('Error inserting achievement:', insertError);
+            throw insertError;
+          }
 
           if (isCompleted) {
+            console.log('New achievement completed, awarding rewards...');
             await awardAchievementReward(achievement);
             toast({
               title: "🏆 Achievement Unlocked!",
               description: `${achievement.title}: ${achievement.description}`,
             });
           }
+        } else {
+          console.log('Achievement already completed, skipping');
         }
       }
 
+      console.log('Reloading achievements...');
       await loadAchievements();
+      console.log('Achievement progress update completed');
     } catch (error) {
       console.error('Error updating chest open progress:', error);
+      // Don't rethrow - let chest opening continue even if achievements fail
     }
   };
 
