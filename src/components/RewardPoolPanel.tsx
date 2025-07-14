@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { useLevelUpRewards } from '@/hooks/useLevelUpRewards';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, Edit3, Save, X } from 'lucide-react';
 
 interface NewReward {
   rewardType: 'hroom' | 'spore' | 'both';
@@ -42,6 +42,29 @@ const RewardPoolPanel: React.FC = () => {
         [field]: value,
       }
     }));
+  };
+
+  const startEditing = (reward: any) => {
+    setEditingRewards(prev => ({
+      ...prev,
+      [reward.id]: {
+        rewardType: reward.rewardType,
+        hroomAmount: reward.hroomAmount,
+        sporeAmount: reward.sporeAmount,
+        weight: reward.weight,
+        minLevel: reward.minLevel,
+        maxLevel: reward.maxLevel,
+        isActive: reward.isActive,
+      }
+    }));
+  };
+
+  const cancelEditing = (rewardId: string) => {
+    setEditingRewards(prev => {
+      const updated = { ...prev };
+      delete updated[rewardId];
+      return updated;
+    });
   };
 
   const handleSaveReward = async (rewardId: string) => {
@@ -159,12 +182,38 @@ const RewardPoolPanel: React.FC = () => {
     return editingRewards[reward.id]?.[field] ?? reward[field];
   };
 
+  const getRewardTypeColor = (type: string) => {
+    switch (type) {
+      case 'hroom': return 'bg-orange-500';
+      case 'spore': return 'bg-green-500';
+      case 'both': return 'bg-purple-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const formatRewardDescription = (reward: any) => {
+    const type = getRewardValue(reward, 'rewardType');
+    const hroom = getRewardValue(reward, 'hroomAmount');
+    const spore = getRewardValue(reward, 'sporeAmount');
+    
+    if (type === 'both') {
+      return `${hroom} HROOM + ${spore} SPORE`;
+    } else if (type === 'hroom') {
+      return `${hroom} HROOM`;
+    } else {
+      return `${spore} SPORE`;
+    }
+  };
+
   return (
     <Card className="p-6 bg-purple-900/20 backdrop-blur-sm border-purple-500/30">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
           <span className="text-2xl">🎁</span>
-          <h3 className="text-xl font-bold text-white">Level Up Reward Pool</h3>
+          <div>
+            <h3 className="text-xl font-bold text-white">Level Up Reward Pool</h3>
+            <p className="text-sm text-gray-400">Manage rewards given when players level up</p>
+          </div>
           <Badge className="bg-purple-500 text-white">Admin Only</Badge>
         </div>
         <Button 
@@ -177,11 +226,15 @@ const RewardPoolPanel: React.FC = () => {
       </div>
 
       {showAddForm && (
-        <Card className="p-4 mb-4 bg-black/20 border-gray-600">
-          <h4 className="text-lg font-semibold text-white mb-3">Add New Reward</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div className="space-y-2">
-              <Label className="text-white">Type</Label>
+        <Card className="p-6 mb-6 bg-black/30 border-gray-600">
+          <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            Add New Reward
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
+              <Label className="text-white font-medium">Reward Type</Label>
               <Select
                 value={newReward.rewardType}
                 onValueChange={(value: 'hroom' | 'spore' | 'both') => 
@@ -191,16 +244,16 @@ const RewardPoolPanel: React.FC = () => {
                 <SelectTrigger className="bg-black/20 border-gray-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hroom">HROOM</SelectItem>
-                  <SelectItem value="spore">SPORE</SelectItem>
-                  <SelectItem value="both">Both</SelectItem>
+                <SelectContent className="bg-gray-800 border-gray-600">
+                  <SelectItem value="hroom">HROOM Only</SelectItem>
+                  <SelectItem value="spore">SPORE Only</SelectItem>
+                  <SelectItem value="both">Both HROOM & SPORE</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-white">HROOM</Label>
+            <div className="space-y-3">
+              <Label className="text-white font-medium">HROOM Amount</Label>
               <Input
                 type="number"
                 value={newReward.hroomAmount}
@@ -209,11 +262,12 @@ const RewardPoolPanel: React.FC = () => {
                   hroomAmount: parseInt(e.target.value) || 0 
                 }))}
                 className="bg-black/20 border-gray-600 text-white"
+                placeholder="100"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-white">SPORE</Label>
+            <div className="space-y-3">
+              <Label className="text-white font-medium">SPORE Amount</Label>
               <Input
                 type="number"
                 value={newReward.sporeAmount}
@@ -222,11 +276,12 @@ const RewardPoolPanel: React.FC = () => {
                   sporeAmount: parseInt(e.target.value) || 0 
                 }))}
                 className="bg-black/20 border-gray-600 text-white"
+                placeholder="25"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-white">Weight</Label>
+            <div className="space-y-3">
+              <Label className="text-white font-medium">Weight</Label>
               <Input
                 type="number"
                 value={newReward.weight}
@@ -235,38 +290,41 @@ const RewardPoolPanel: React.FC = () => {
                   weight: parseInt(e.target.value) || 1 
                 }))}
                 className="bg-black/20 border-gray-600 text-white"
+                placeholder="5"
               />
+              <p className="text-xs text-gray-400">Higher weight = more likely to be selected</p>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-white">Min Level</Label>
-              <Input
-                type="number"
-                value={newReward.minLevel}
-                onChange={(e) => setNewReward(prev => ({ 
-                  ...prev, 
-                  minLevel: parseInt(e.target.value) || 1 
-                }))}
-                className="bg-black/20 border-gray-600 text-white"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-white">Max Level</Label>
-              <Input
-                type="number"
-                value={newReward.maxLevel}
-                onChange={(e) => setNewReward(prev => ({ 
-                  ...prev, 
-                  maxLevel: parseInt(e.target.value) || 100 
-                }))}
-                className="bg-black/20 border-gray-600 text-white"
-              />
+            <div className="space-y-3">
+              <Label className="text-white font-medium">Level Range</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={newReward.minLevel}
+                  onChange={(e) => setNewReward(prev => ({ 
+                    ...prev, 
+                    minLevel: parseInt(e.target.value) || 1 
+                  }))}
+                  className="bg-black/20 border-gray-600 text-white"
+                  placeholder="Min"
+                />
+                <Input
+                  type="number"
+                  value={newReward.maxLevel}
+                  onChange={(e) => setNewReward(prev => ({ 
+                    ...prev, 
+                    maxLevel: parseInt(e.target.value) || 100 
+                  }))}
+                  className="bg-black/20 border-gray-600 text-white"
+                  placeholder="Max"
+                />
+              </div>
+              <p className="text-xs text-gray-400">Levels {newReward.minLevel}-{newReward.maxLevel}</p>
             </div>
           </div>
           
-          <div className="flex gap-2 mt-4">
-            <Button onClick={handleAddReward} disabled={loading}>
+          <div className="flex gap-3 mt-6">
+            <Button onClick={handleAddReward} disabled={loading} className="bg-green-600 hover:bg-green-700">
               {loading ? 'Adding...' : 'Add Reward'}
             </Button>
             <Button 
@@ -280,114 +338,167 @@ const RewardPoolPanel: React.FC = () => {
         </Card>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {rewardsPool.map((reward) => {
-          const hasChanges = editingRewards[reward.id];
+          const isEditing = editingRewards[reward.id];
+          const isActive = getRewardValue(reward, 'isActive');
+          
           return (
-            <div key={reward.id} className="p-4 bg-black/20 rounded-lg border border-gray-600">
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 items-end">
-                <div className="space-y-2">
-                  <Label className="text-white text-xs">Type</Label>
-                  <Select
-                    value={getRewardValue(reward, 'rewardType')}
-                    onValueChange={(value) => handleEditReward(reward.id, 'rewardType', value)}
-                  >
-                    <SelectTrigger className="bg-black/20 border-gray-600 text-white h-8">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hroom">HROOM</SelectItem>
-                      <SelectItem value="spore">SPORE</SelectItem>
-                      <SelectItem value="both">Both</SelectItem>
-                    </SelectContent>
-                  </Select>
+            <Card key={reward.id} className={`p-5 transition-all duration-200 ${
+              isActive ? 'bg-black/20 border-gray-600' : 'bg-black/10 border-gray-700 opacity-60'
+            }`}>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Badge className={`${getRewardTypeColor(getRewardValue(reward, 'rewardType'))} text-white px-3 py-1`}>
+                    {getRewardValue(reward, 'rewardType').toUpperCase()}
+                  </Badge>
+                  <div>
+                    <p className="text-white font-medium text-lg">
+                      {formatRewardDescription(reward)}
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      Levels {getRewardValue(reward, 'minLevel')}-{getRewardValue(reward, 'maxLevel')} • 
+                      Weight: {getRewardValue(reward, 'weight')} • 
+                      {isActive ? 'Active' : 'Inactive'}
+                    </p>
+                  </div>
                 </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white text-xs">HROOM</Label>
-                  <Input
-                    type="number"
-                    value={getRewardValue(reward, 'hroomAmount')}
-                    onChange={(e) => handleEditReward(reward.id, 'hroomAmount', parseInt(e.target.value) || 0)}
-                    className="bg-black/20 border-gray-600 text-white h-8"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white text-xs">SPORE</Label>
-                  <Input
-                    type="number"
-                    value={getRewardValue(reward, 'sporeAmount')}
-                    onChange={(e) => handleEditReward(reward.id, 'sporeAmount', parseInt(e.target.value) || 0)}
-                    className="bg-black/20 border-gray-600 text-white h-8"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white text-xs">Weight</Label>
-                  <Input
-                    type="number"
-                    value={getRewardValue(reward, 'weight')}
-                    onChange={(e) => handleEditReward(reward.id, 'weight', parseInt(e.target.value) || 1)}
-                    className="bg-black/20 border-gray-600 text-white h-8"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white text-xs">Min Level</Label>
-                  <Input
-                    type="number"
-                    value={getRewardValue(reward, 'minLevel')}
-                    onChange={(e) => handleEditReward(reward.id, 'minLevel', parseInt(e.target.value) || 1)}
-                    className="bg-black/20 border-gray-600 text-white h-8"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white text-xs">Max Level</Label>
-                  <Input
-                    type="number"
-                    value={getRewardValue(reward, 'maxLevel')}
-                    onChange={(e) => handleEditReward(reward.id, 'maxLevel', parseInt(e.target.value) || 100)}
-                    className="bg-black/20 border-gray-600 text-white h-8"
-                  />
-                </div>
-
+                
                 <div className="flex items-center gap-2">
                   <div className="flex items-center space-x-2">
                     <Switch
-                      checked={getRewardValue(reward, 'isActive')}
-                      onCheckedChange={(checked) => handleEditReward(reward.id, 'isActive', checked)}
+                      checked={isActive}
+                      onCheckedChange={(checked) => {
+                        if (!isEditing) startEditing(reward);
+                        handleEditReward(reward.id, 'isActive', checked);
+                      }}
                     />
-                    <Label className="text-white text-xs">Active</Label>
+                    <Label className="text-white text-sm">Active</Label>
                   </div>
                   
-                  <div className="flex gap-1">
-                    {hasChanges && (
+                  {!isEditing ? (
+                    <div className="flex gap-1">
+                      <Button
+                        onClick={() => startEditing(reward)}
+                        size="sm"
+                        variant="outline"
+                        className="border-gray-600 text-white hover:bg-gray-800 h-8 px-3"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteReward(reward.id)}
+                        disabled={loading}
+                        size="sm"
+                        variant="destructive"
+                        className="h-8 px-3"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-1">
                       <Button 
                         onClick={() => handleSaveReward(reward.id)}
                         disabled={loading}
                         size="sm"
-                        className="bg-green-600 hover:bg-green-700 h-8 px-2"
+                        className="bg-green-600 hover:bg-green-700 h-8 px-3"
                       >
-                        Save
+                        <Save className="w-3 h-3" />
                       </Button>
-                    )}
-                    <Button
-                      onClick={() => handleDeleteReward(reward.id)}
-                      disabled={loading}
-                      size="sm"
-                      variant="destructive"
-                      className="h-8 px-2"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
+                      <Button
+                        onClick={() => cancelEditing(reward.id)}
+                        size="sm"
+                        variant="outline"
+                        className="border-gray-600 text-white hover:bg-gray-800 h-8 px-3"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+
+              {isEditing && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-600">
+                  <div className="space-y-2">
+                    <Label className="text-white text-sm">Type</Label>
+                    <Select
+                      value={getRewardValue(reward, 'rewardType')}
+                      onValueChange={(value) => handleEditReward(reward.id, 'rewardType', value)}
+                    >
+                      <SelectTrigger className="bg-black/20 border-gray-600 text-white h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-600">
+                        <SelectItem value="hroom">HROOM</SelectItem>
+                        <SelectItem value="spore">SPORE</SelectItem>
+                        <SelectItem value="both">Both</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white text-sm">HROOM Amount</Label>
+                    <Input
+                      type="number"
+                      value={getRewardValue(reward, 'hroomAmount')}
+                      onChange={(e) => handleEditReward(reward.id, 'hroomAmount', parseInt(e.target.value) || 0)}
+                      className="bg-black/20 border-gray-600 text-white h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white text-sm">SPORE Amount</Label>
+                    <Input
+                      type="number"
+                      value={getRewardValue(reward, 'sporeAmount')}
+                      onChange={(e) => handleEditReward(reward.id, 'sporeAmount', parseInt(e.target.value) || 0)}
+                      className="bg-black/20 border-gray-600 text-white h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white text-sm">Weight</Label>
+                    <Input
+                      type="number"
+                      value={getRewardValue(reward, 'weight')}
+                      onChange={(e) => handleEditReward(reward.id, 'weight', parseInt(e.target.value) || 1)}
+                      className="bg-black/20 border-gray-600 text-white h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white text-sm">Min Level</Label>
+                    <Input
+                      type="number"
+                      value={getRewardValue(reward, 'minLevel')}
+                      onChange={(e) => handleEditReward(reward.id, 'minLevel', parseInt(e.target.value) || 1)}
+                      className="bg-black/20 border-gray-600 text-white h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white text-sm">Max Level</Label>
+                    <Input
+                      type="number"
+                      value={getRewardValue(reward, 'maxLevel')}
+                      onChange={(e) => handleEditReward(reward.id, 'maxLevel', parseInt(e.target.value) || 100)}
+                      className="bg-black/20 border-gray-600 text-white h-9"
+                    />
+                  </div>
+                </div>
+              )}
+            </Card>
           );
         })}
+        
+        {rewardsPool.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-lg">No rewards in the pool yet</p>
+            <p className="text-gray-500 text-sm mt-2">Add your first reward to get started</p>
+          </div>
+        )}
       </div>
     </Card>
   );
