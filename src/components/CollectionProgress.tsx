@@ -10,23 +10,23 @@ interface CollectionProgressProps {
 const REQUIRED_CONTRACTS = [
   { 
     address: '0xA63EfDE7Cb14DD537b7e61a3087aE9B8A7849eE2', 
-    name: 'Actrule Alpha' 
+    name: 'Alpha Genesis' 
   },
   { 
     address: '0xe364d16731579078afa1195630e4035657ef9d1a', 
-    name: 'Actrule Beta' 
+    name: 'Beta Explorer' 
   },
   { 
     address: '0x97386b7fae8bc384afa1af14b6dd96d9123f762f', 
-    name: 'Actrule Gamma' 
+    name: 'Gamma Warrior' 
   },
   { 
     address: '0x9c92b882ac7aeff58414d874de60d30381991bad', 
-    name: 'Actrule Delta' 
+    name: 'Delta Pioneer' 
   },
   { 
     address: '0xbd24e412d8eb0bca223ad87869374d97cede3424', 
-    name: 'Actrule Epsilon' 
+    name: 'Epsilon Legend' 
   }
 ];
 
@@ -53,7 +53,7 @@ export const CollectionProgress: React.FC<CollectionProgressProps> = ({ ownedCon
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>Actrule NFTs Collected</span>
+            <span>NFTs Collected</span>
             <span className="font-semibold">{ownedCount}/{REQUIRED_CONTRACTS.length}</span>
           </div>
           <Progress value={progressPercentage} className="h-3" />
@@ -100,7 +100,7 @@ export const CollectionProgress: React.FC<CollectionProgressProps> = ({ ownedCon
                 🏆 Collection Master Achieved!
               </div>
               <div className="text-sm text-muted-foreground">
-                You've collected all 5 Actrule NFTs and earned massive rewards!
+                You've collected all 5 NFTs and earned massive rewards!
               </div>
               <div className="mt-2 text-xs">
                 <span className="text-success font-semibold">+1000 🍄 +5000 🏠</span>

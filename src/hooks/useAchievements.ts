@@ -161,7 +161,7 @@ export const useAchievements = () => {
           // Record collection completion
           const { error: insertError } = await supabase
             .from('collection_completions')
-            .insert({
+            .upsert({
               wallet_address: address,
               first_completion_at: new Date().toISOString()
             });
