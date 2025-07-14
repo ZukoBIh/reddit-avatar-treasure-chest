@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from '@/hooks/use-toast';
 import RarityRewardsPanel from './RarityRewardsPanel';
+import LevelingConfigPanel from './LevelingConfigPanel';
+import RewardPoolPanel from './RewardPoolPanel';
 
 interface Avatar {
   id: string;
@@ -63,6 +65,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ avatars, onRarityChange, onSave
       className="mb-6 space-y-4"
     >
       <RarityRewardsPanel />
+      <LevelingConfigPanel />
+      <RewardPoolPanel />
       
       <Card className="p-6 bg-red-900/20 backdrop-blur-sm border-red-500/30">
         <div className="flex items-center justify-between mb-4">
