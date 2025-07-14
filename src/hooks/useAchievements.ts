@@ -151,8 +151,6 @@ export const useAchievements = () => {
         }
       }
 
-      console.log('Reloading achievements...');
-      await loadAchievements();
       console.log('Achievement progress update completed');
     } catch (error) {
       console.error('Error updating chest open progress:', error);
