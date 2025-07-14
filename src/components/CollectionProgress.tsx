@@ -10,23 +10,23 @@ interface CollectionProgressProps {
 const REQUIRED_CONTRACTS = [
   { 
     address: '0xA63EfDE7Cb14DD537b7e61a3087aE9B8A7849eE2', 
-    name: 'Alpha Genesis' 
+    name: 'Mooshies House' 
   },
   { 
     address: '0xe364d16731579078afa1195630e4035657ef9d1a', 
-    name: 'Beta Explorer' 
+    name: 'King Mooshie' 
   },
   { 
     address: '0x97386b7fae8bc384afa1af14b6dd96d9123f762f', 
-    name: 'Gamma Warrior' 
+    name: 'Queen Mooshie' 
   },
   { 
     address: '0x9c92b882ac7aeff58414d874de60d30381991bad', 
-    name: 'Delta Pioneer' 
+    name: 'Kid Shroom' 
   },
   { 
     address: '0xbd24e412d8eb0bca223ad87869374d97cede3424', 
-    name: 'Epsilon Legend' 
+    name: 'Gold Mooshie' 
   }
 ];
 

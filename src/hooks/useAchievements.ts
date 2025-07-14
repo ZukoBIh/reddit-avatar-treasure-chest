@@ -105,7 +105,7 @@ export const useAchievements = () => {
 
           const { error: insertError } = await supabase
             .from('user_achievements')
-            .insert({
+            .upsert({
               wallet_address: address,
               achievement_key: achievement.achievement_key,
               progress: 1,
