@@ -180,10 +180,7 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
   };
 
   const handleOpenAnother = () => {
-    setShowReward(false);
-    setReward(null);
-    setXpGained(0);
-    setLevelUpInfo(null);
+    resetState(); // Use full reset to go back to unopened state
   };
 
   useEffect(() => {
