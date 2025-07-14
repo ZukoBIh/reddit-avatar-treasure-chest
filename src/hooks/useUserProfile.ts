@@ -67,20 +67,32 @@ export const useUserProfile = () => {
     console.log('Updating database with:', updateData);
     console.log('Wallet address filter:', updatedProfile.walletAddress);
     
-    const { error } = await supabase
-      .from('user_profiles')
-      .update(updateData)
-      .eq('wallet_address', updatedProfile.walletAddress);
+    try {
+      // Add timeout to catch hanging requests
+      const updatePromise = supabase
+        .from('user_profiles')
+        .update(updateData)
+        .eq('wallet_address', updatedProfile.walletAddress);
 
-    console.log('Database update result - error:', error);
-    
-    if (error) {
-      console.error('Database update failed:', error);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database update timeout')), 10000)
+      );
+
+      const { error } = await Promise.race([updatePromise, timeoutPromise]) as any;
+
+      console.log('Database update result - error:', error);
+      
+      if (error) {
+        console.error('Database update failed:', error);
+        throw error;
+      }
+      
+      console.log('Setting profile state to:', updatedProfile);
+      setProfile(updatedProfile);
+    } catch (error) {
+      console.error('Error in updateProfile:', error);
       throw error;
     }
-    
-    console.log('Setting profile state to:', updatedProfile);
-    setProfile(updatedProfile);
   };
 
   const addXP = async (xpGained: number) => {
