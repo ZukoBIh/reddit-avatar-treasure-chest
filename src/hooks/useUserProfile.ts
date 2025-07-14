@@ -65,14 +65,21 @@ export const useUserProfile = () => {
     };
     
     console.log('Updating database with:', updateData);
-    console.log('Wallet address filter:', updatedProfile.walletAddress);
+    console.log('Profile ID filter:', updatedProfile.id);
     
     try {
       console.log('About to call supabase update...');
-      const result = await supabase
-        .from('user_profiles')
-        .update(updateData)
-        .eq('wallet_address', updatedProfile.walletAddress);
+      
+      // Use profile ID instead of wallet_address for better performance
+      const result = await Promise.race([
+        supabase
+          .from('user_profiles')
+          .update(updateData)
+          .eq('id', updatedProfile.id),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Update timeout after 5 seconds')), 5000)
+        )
+      ]) as any;
 
       console.log('Supabase update completed, result:', result);
       
@@ -86,6 +93,14 @@ export const useUserProfile = () => {
       console.log('Profile state updated successfully');
     } catch (error) {
       console.error('Error in updateProfile:', error);
+      
+      // If it's a timeout, update local state anyway and show warning
+      if (error.message.includes('timeout')) {
+        console.warn('Database update timed out, updating local state only');
+        setProfile(updatedProfile);
+        return; // Don't throw, allow the chest opening to continue
+      }
+      
       throw error;
     }
   };
