@@ -54,18 +54,32 @@ export const useUserProfile = () => {
   };
 
   const updateProfile = async (updatedProfile: UserProfile) => {
+    console.log('updateProfile called with:', updatedProfile);
+    
+    const updateData = {
+      level: updatedProfile.level,
+      current_xp: updatedProfile.currentXP,
+      total_hroom: updatedProfile.totalHroom,
+      total_spores: updatedProfile.totalSpores,
+      is_admin: updatedProfile.isAdmin,
+    };
+    
+    console.log('Updating database with:', updateData);
+    console.log('Wallet address filter:', updatedProfile.walletAddress);
+    
     const { error } = await supabase
       .from('user_profiles')
-      .update({
-        level: updatedProfile.level,
-        current_xp: updatedProfile.currentXP,
-        total_hroom: updatedProfile.totalHroom,
-        total_spores: updatedProfile.totalSpores,
-        is_admin: updatedProfile.isAdmin,
-      })
+      .update(updateData)
       .eq('wallet_address', updatedProfile.walletAddress);
 
-    if (error) throw error;
+    console.log('Database update result - error:', error);
+    
+    if (error) {
+      console.error('Database update failed:', error);
+      throw error;
+    }
+    
+    console.log('Setting profile state to:', updatedProfile);
     setProfile(updatedProfile);
   };
 
