@@ -70,17 +70,28 @@ export const useUserProfile = () => {
   };
 
   const addXP = async (xpGained: number) => {
-    if (!profile) return { leveledUp: false, newLevel: 1 };
+    console.log('addXP called with:', xpGained);
+    if (!profile) {
+      console.log('No profile found, returning early');
+      return { leveledUp: false, newLevel: 1 };
+    }
 
+    console.log('Current profile:', profile);
     const newXP = profile.currentXP + xpGained;
     const newLevel = getLevelFromXp(newXP);
     const leveledUp = newLevel > profile.level;
     
+    console.log('XP calculation:', { newXP, newLevel, leveledUp });
+    
     // Calculate level-up rewards using pooled system
     const levelsGained = leveledUp ? newLevel - profile.level : 0;
+    console.log('Levels gained:', levelsGained);
+    
     const { hroom: hroomReward, spores: sporeReward } = levelsGained > 0 
       ? getLevelUpRewards(newLevel, levelsGained) 
       : { hroom: 0, spores: 0 };
+    
+    console.log('Rewards calculated:', { hroomReward, sporeReward });
     
     const updatedProfile = {
       ...profile,
@@ -90,9 +101,16 @@ export const useUserProfile = () => {
       totalSpores: profile.totalSpores + sporeReward,
     };
 
-    await updateProfile(updatedProfile);
+    console.log('About to update profile with:', updatedProfile);
     
-    return { leveledUp, newLevel };
+    try {
+      await updateProfile(updatedProfile);
+      console.log('Profile updated successfully');
+      return { leveledUp, newLevel };
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
   };
 
   const getXPForCurrentLevel = () => {
