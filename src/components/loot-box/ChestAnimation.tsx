@@ -12,19 +12,19 @@ export const ChestAnimation: React.FC<ChestAnimationProps> = ({ isOpening }) => 
       <motion.div
         className="text-8xl mb-6 relative"
         animate={{ 
-          scale: [1, 1.2, 1],
-          rotate: [0, 360],
+          scale: [1, 1.2, 1, 1.2, 1],
+          rotate: [0, 180, 360, 180, 0],
         }}
-        transition={{ duration: 0.8, repeat: Infinity }}
+        transition={{ duration: 2, ease: "easeInOut" }}
       >
         🍄
         <motion.div
           className="absolute inset-0 text-6xl"
           animate={{ 
-            scale: [0, 1.5, 0],
-            opacity: [0, 1, 0],
+            scale: [0, 1.5, 0, 1.5, 0],
+            opacity: [0, 1, 0, 1, 0],
           }}
-          transition={{ duration: 1, repeat: Infinity }}
+          transition={{ duration: 2, ease: "easeInOut" }}
         >
           ✨
         </motion.div>
