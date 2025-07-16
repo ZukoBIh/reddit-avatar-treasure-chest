@@ -76,11 +76,6 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
       console.log('Waiting for chest animation...');
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Animation finished, now process the reward and auto-close
-      setTimeout(() => {
-        handleClose();
-      }, 1000); // Close modal 1 second after animation ends
-      
       // Get rarity-specific config or fallback to default
       const rarityConfig = rewards[avatar.rarity] || {
         baseXpMin: config.baseXpMin,
