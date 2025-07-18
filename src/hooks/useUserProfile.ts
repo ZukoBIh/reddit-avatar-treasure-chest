@@ -70,18 +70,40 @@ export const useUserProfile = () => {
     try {
       console.log('About to call supabase update...');
       
-      // First, check if the profile exists
+      console.log('About to call supabase update...');
+      
+      // First, check if the profile exists with timeout
       console.log('Checking if profile exists...');
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', updatedProfile.id)
-        .single();
+      
+      let existingProfile;
+      let fetchError;
+      
+      try {
+        const profilePromise = supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', updatedProfile.id)
+          .single();
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
+        );
+        
+        const result = await Promise.race([profilePromise, timeoutPromise]) as any;
+        existingProfile = result?.data;
+        fetchError = result?.error;
+      } catch (error) {
+        console.error('Profile fetch failed with error:', error);
+        fetchError = error as any;
+      }
       
       console.log('Profile check result:', { existingProfile, fetchError });
       
       if (fetchError) {
         console.error('Profile fetch failed:', fetchError);
+        if (fetchError.message === 'Profile fetch timeout') {
+          throw new Error('Database query timed out - there may be a connectivity issue');
+        }
         throw new Error(`Profile not found: ${fetchError.message}`);
       }
       
