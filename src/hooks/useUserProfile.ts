@@ -70,6 +70,21 @@ export const useUserProfile = () => {
     try {
       console.log('About to call supabase update...');
       
+      // Simple test first - just try to update without select
+      const testResult = await supabase
+        .from('user_profiles')
+        .update({ current_xp: updatedProfile.currentXP })
+        .eq('id', updatedProfile.id);
+
+      console.log('Simple update test result:', testResult);
+      
+      if (testResult.error) {
+        console.error('Simple update failed:', testResult.error);
+        throw testResult.error;
+      }
+      
+      console.log('Simple update succeeded, now doing full update...');
+      
       const { data, error } = await supabase
         .from('user_profiles')
         .update(updateData)
@@ -77,7 +92,7 @@ export const useUserProfile = () => {
         .select()
         .single();
 
-      console.log('Supabase update completed, data:', data, 'error:', error);
+      console.log('Full update completed, data:', data, 'error:', error);
       
       if (error) {
         console.error('Database update failed:', error);
