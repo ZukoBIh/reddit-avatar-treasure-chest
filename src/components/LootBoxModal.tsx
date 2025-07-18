@@ -139,9 +139,12 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
         icon: '⭐'
       };
       
+      console.log('Setting reward and showing reward display...');
       setReward(tokenReward || mainReward);
       setIsOpening(false);
       setShowReward(true);
+      console.log('Reward set:', tokenReward || mainReward);
+      console.log('showReward set to true');
       
       // Show toast notification
       let description = `+${finalXP} XP gained (${avatar.rarity} ${multiplier}x bonus)!`;
