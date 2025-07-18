@@ -70,22 +70,18 @@ export const useUserProfile = () => {
     try {
       console.log('About to call supabase update...');
       
-      // Use profile ID instead of wallet_address for better performance
-      const result = await Promise.race([
-        supabase
-          .from('user_profiles')
-          .update(updateData)
-          .eq('id', updatedProfile.id),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Update timeout after 30 seconds')), 30000)
-        )
-      ]) as any;
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .update(updateData)
+        .eq('id', updatedProfile.id)
+        .select()
+        .single();
 
-      console.log('Supabase update completed, result:', result);
+      console.log('Supabase update completed, data:', data, 'error:', error);
       
-      if (result.error) {
-        console.error('Database update failed:', result.error);
-        throw result.error;
+      if (error) {
+        console.error('Database update failed:', error);
+        throw error;
       }
       
       console.log('Setting profile state to:', updatedProfile);
@@ -93,7 +89,7 @@ export const useUserProfile = () => {
       console.log('Profile state updated successfully');
     } catch (error) {
       console.error('Error in updateProfile:', error);
-      throw error; // Always throw errors, no local fallback
+      throw error;
     }
   };
 
