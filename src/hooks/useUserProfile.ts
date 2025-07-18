@@ -68,66 +68,7 @@ export const useUserProfile = () => {
     console.log('Profile ID filter:', updatedProfile.id);
     
     try {
-      console.log('About to call supabase update...');
-      
-      console.log('About to call supabase update...');
-      
-      // First, check if the profile exists with timeout
-      console.log('Checking if profile exists...');
-      
-      let existingProfile;
-      let fetchError;
-      
-      try {
-        const profilePromise = supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', updatedProfile.id)
-          .single();
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
-        );
-        
-        const result = await Promise.race([profilePromise, timeoutPromise]) as any;
-        existingProfile = result?.data;
-        fetchError = result?.error;
-      } catch (error) {
-        console.error('Profile fetch failed with error:', error);
-        fetchError = error as any;
-      }
-      
-      console.log('Profile check result:', { existingProfile, fetchError });
-      
-      if (fetchError) {
-        console.error('Profile fetch failed:', fetchError);
-        if (fetchError.message === 'Profile fetch timeout') {
-          throw new Error('Database query timed out - there may be a connectivity issue');
-        }
-        throw new Error(`Profile not found: ${fetchError.message}`);
-      }
-      
-      if (!existingProfile) {
-        throw new Error('Profile does not exist');
-      }
-      
-      console.log('Profile exists, proceeding with update...');
-      
-      // Simple test first - just try to update current_xp
-      console.log('Testing simple update...');
-      const testResult = await supabase
-        .from('user_profiles')
-        .update({ current_xp: updatedProfile.currentXP })
-        .eq('id', updatedProfile.id);
-
-      console.log('Simple update test result:', testResult);
-      
-      if (testResult.error) {
-        console.error('Simple update failed:', testResult.error);
-        throw testResult.error;
-      }
-      
-      console.log('Simple update succeeded, now doing full update...');
+      console.log('Attempting direct update without pre-check...');
       
       const { data, error } = await supabase
         .from('user_profiles')
@@ -136,7 +77,7 @@ export const useUserProfile = () => {
         .select()
         .single();
 
-      console.log('Full update completed, data:', data, 'error:', error);
+      console.log('Update completed, data:', data, 'error:', error);
       
       if (error) {
         console.error('Database update failed:', error);
