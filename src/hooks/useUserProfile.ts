@@ -70,7 +70,29 @@ export const useUserProfile = () => {
     try {
       console.log('About to call supabase update...');
       
-      // Simple test first - just try to update without select
+      // First, check if the profile exists
+      console.log('Checking if profile exists...');
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', updatedProfile.id)
+        .single();
+      
+      console.log('Profile check result:', { existingProfile, fetchError });
+      
+      if (fetchError) {
+        console.error('Profile fetch failed:', fetchError);
+        throw new Error(`Profile not found: ${fetchError.message}`);
+      }
+      
+      if (!existingProfile) {
+        throw new Error('Profile does not exist');
+      }
+      
+      console.log('Profile exists, proceeding with update...');
+      
+      // Simple test first - just try to update current_xp
+      console.log('Testing simple update...');
       const testResult = await supabase
         .from('user_profiles')
         .update({ current_xp: updatedProfile.currentXP })
