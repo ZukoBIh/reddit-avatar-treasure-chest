@@ -54,8 +54,6 @@ export const useUserProfile = () => {
   };
 
   const updateProfile = async (updatedProfile: UserProfile) => {
-    console.log('updateProfile called with:', updatedProfile);
-    
     const updateData = {
       level: updatedProfile.level,
       current_xp: updatedProfile.currentXP,
@@ -64,29 +62,19 @@ export const useUserProfile = () => {
       is_admin: updatedProfile.isAdmin,
     };
     
-    console.log('Updating database with:', updateData);
-    console.log('Profile ID filter:', updatedProfile.id);
-    
     try {
-      console.log('Attempting direct update without pre-check...');
-      
       const { error } = await supabase
         .from('user_profiles')
         .update(updateData)
         .eq('id', updatedProfile.id);
 
-      console.log('Update completed, error:', error);
-      
       if (error) {
-        console.error('Database update failed:', error);
         throw error;
       }
       
-      console.log('Setting profile state to:', updatedProfile);
       setProfile(updatedProfile);
-      console.log('Profile state updated successfully');
     } catch (error) {
-      console.error('Error in updateProfile:', error);
+      console.error('Error updating profile:', error);
       throw error;
     }
   };
