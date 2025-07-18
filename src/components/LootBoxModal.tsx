@@ -112,18 +112,27 @@ const LootBoxModal: React.FC<LootBoxModalProps> = ({ isOpen, onClose, avatar }) 
       console.log('Adding XP...');
       // Add XP and check for level up
       const levelResult = await addXP(finalXP);
+      console.log('addXP completed, result:', levelResult);
       setLevelUpInfo(levelResult);
       console.log('XP added successfully');
       
       console.log('Updating cooldown...');
-      // Update cooldown
-      await updateCooldown(avatar.id);
-      console.log('Cooldown updated successfully');
+      try {
+        // Update cooldown
+        await updateCooldown(avatar.id);
+        console.log('Cooldown updated successfully');
+      } catch (error) {
+        console.error('Error updating cooldown:', error);
+      }
       
       console.log('Updating achievement progress...');
-      // Update achievement progress for chest opening
-      await updateChestOpenProgress();
-      console.log('Achievement progress updated successfully');
+      try {
+        // Update achievement progress for chest opening
+        await updateChestOpenProgress();
+        console.log('Achievement progress updated successfully');
+      } catch (error) {
+        console.error('Error updating achievement progress:', error);
+      }
       
       // Refresh profile bar
       if ((window as any).refreshProfile) {
