@@ -70,14 +70,12 @@ export const useUserProfile = () => {
     try {
       console.log('Attempting direct update without pre-check...');
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('user_profiles')
         .update(updateData)
-        .eq('id', updatedProfile.id)
-        .select()
-        .single();
+        .eq('id', updatedProfile.id);
 
-      console.log('Update completed, data:', data, 'error:', error);
+      console.log('Update completed, error:', error);
       
       if (error) {
         console.error('Database update failed:', error);
