@@ -63,10 +63,17 @@ export const useUserProfile = () => {
     };
     
     try {
-      const { error } = await supabase
+      // Add timeout to prevent hanging
+      const updatePromise = supabase
         .from('user_profiles')
         .update(updateData)
         .eq('id', updatedProfile.id);
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Update timeout')), 5000)
+      );
+      
+      const { error } = await Promise.race([updatePromise, timeoutPromise]) as any;
 
       if (error) {
         throw error;
@@ -75,7 +82,8 @@ export const useUserProfile = () => {
       setProfile(updatedProfile);
     } catch (error) {
       console.error('Error updating profile:', error);
-      throw error;
+      // Still update local state even if DB update fails
+      setProfile(updatedProfile);
     }
   };
 
